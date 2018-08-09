@@ -7,30 +7,40 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ohana3DS Rebirth", "Ohana3D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ohana3DS Rebirth GUI", "Ohana3DS Rebirth GUI\Ohana3DS Rebirth GUI.csproj", "{798F2E1A-8993-4B50-8D31-9FAD4287E54C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ohana3DS Rebirth CLI", "Ohana3DS Rebirth CLI\Ohana3DS Rebirth CLI.csproj", "{1B13CCAF-2AE1-4972-B697-E8CF11A085E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
+		Debug|Any CPU (Except GUI) = Debug|Any CPU (Except GUI)
 		Debug|x86 = Debug|x86
-		Release|Any CPU = Release|Any CPU
+		Release|Any CPU (Except GUI) = Release|Any CPU (Except GUI)
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{79753E74-1271-4C63-8249-0391F761CBCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{79753E74-1271-4C63-8249-0391F761CBCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79753E74-1271-4C63-8249-0391F761CBCC}.Debug|Any CPU (Except GUI).ActiveCfg = Debug|Any CPU
+		{79753E74-1271-4C63-8249-0391F761CBCC}.Debug|Any CPU (Except GUI).Build.0 = Debug|Any CPU
 		{79753E74-1271-4C63-8249-0391F761CBCC}.Debug|x86.ActiveCfg = Debug|x86
 		{79753E74-1271-4C63-8249-0391F761CBCC}.Debug|x86.Build.0 = Debug|x86
-		{79753E74-1271-4C63-8249-0391F761CBCC}.Release|Any CPU.ActiveCfg = Release|x86
-		{79753E74-1271-4C63-8249-0391F761CBCC}.Release|Any CPU.Build.0 = Release|x86
+		{79753E74-1271-4C63-8249-0391F761CBCC}.Release|Any CPU (Except GUI).ActiveCfg = Release|x86
+		{79753E74-1271-4C63-8249-0391F761CBCC}.Release|Any CPU (Except GUI).Build.0 = Release|x86
 		{79753E74-1271-4C63-8249-0391F761CBCC}.Release|x86.ActiveCfg = Release|x86
 		{79753E74-1271-4C63-8249-0391F761CBCC}.Release|x86.Build.0 = Release|x86
-		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Debug|Any CPU (Except GUI).ActiveCfg = Debug|x86
+		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Debug|Any CPU (Except GUI).Build.0 = Debug|x86
 		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Debug|x86.ActiveCfg = Debug|x86
 		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Debug|x86.Build.0 = Debug|x86
-		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Release|Any CPU (Except GUI).ActiveCfg = Release|Any CPU
+		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Release|Any CPU (Except GUI).Build.0 = Release|Any CPU
 		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Release|x86.ActiveCfg = Release|x86
 		{798F2E1A-8993-4B50-8D31-9FAD4287E54C}.Release|x86.Build.0 = Release|x86
+		{1B13CCAF-2AE1-4972-B697-E8CF11A085E6}.Debug|Any CPU (Except GUI).ActiveCfg = Debug|Any CPU
+		{1B13CCAF-2AE1-4972-B697-E8CF11A085E6}.Debug|Any CPU (Except GUI).Build.0 = Debug|Any CPU
+		{1B13CCAF-2AE1-4972-B697-E8CF11A085E6}.Debug|x86.ActiveCfg = Debug|x86
+		{1B13CCAF-2AE1-4972-B697-E8CF11A085E6}.Debug|x86.Build.0 = Debug|x86
+		{1B13CCAF-2AE1-4972-B697-E8CF11A085E6}.Release|Any CPU (Except GUI).ActiveCfg = Release|Any CPU
+		{1B13CCAF-2AE1-4972-B697-E8CF11A085E6}.Release|Any CPU (Except GUI).Build.0 = Release|Any CPU
+		{1B13CCAF-2AE1-4972-B697-E8CF11A085E6}.Release|x86.ActiveCfg = Release|x86
+		{1B13CCAF-2AE1-4972-B697-E8CF11A085E6}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
