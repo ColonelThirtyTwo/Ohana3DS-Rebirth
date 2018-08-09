@@ -37,7 +37,10 @@ namespace Ohana3DS_Rebirth.GUI
 							switch (saveDlg.FilterIndex)
 							{
 								case 1:
-									SMD.export((RenderBase.OModelGroup)data, saveDlg.FileName, arguments[0], arguments[1]);
+									var warnings = SMD.export((RenderBase.OModelGroup)data, saveDlg.FileName, arguments[0], arguments[1]);
+									foreach(var warning in warnings) {
+										MessageBox.Show(warning, "SMD Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+									}
 									break;
 							}
 						}

@@ -55,6 +55,15 @@ namespace Ohana3DS_Rebirth.GUI.Forms
             ok();
         }
 
+        private void smd_export_show_warnings(RenderBase.OModelGroup model, string fileName, int modelIndex, int skeletalAnimationIndex = -1)
+        {
+            var warnings = SMD.export(model, fileName, modelIndex, skeletalAnimationIndex);
+            foreach (var warning in warnings)
+            {
+                MessageBox.Show(warning, "SMD Exporter", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void ok()
         {
             if (!Directory.Exists(TxtOutFolder.Text))
@@ -87,7 +96,7 @@ namespace Ohana3DS_Rebirth.GUI.Forms
                     switch (format)
                     {
                         case 0: DAE.export(mdls, fileName + ".dae", i); break;
-                        case 1: SMD.export(mdls, fileName + ".smd", i); break;
+                        case 1: smd_export_show_warnings(mdls, fileName + ".smd", i); break;
                         case 2: OBJ.export(mdls, fileName + ".obj", i); break;
                         case 3: CMDL.export(mdls, fileName + ".cmdl", i); break;
                     }
@@ -101,13 +110,13 @@ namespace Ohana3DS_Rebirth.GUI.Forms
                 {
                     case 0: DAE.export(mdls, fileName + ".dae", mdlIndex); break;
                     case 1:
-                        SMD.export(mdls, fileName + ".smd", mdlIndex);
+                        smd_export_show_warnings(mdls, fileName + ".smd", mdlIndex);
                         if (ChkExportAllAnimations.Checked)
                         {
                             for (int i = 0; i < mdls.skeletalAnimation.list.Count; i++)
                             {
                                 string name = mdls.skeletalAnimation.list[i].name + ".smd";
-                                SMD.export(mdls, Path.Combine(TxtOutFolder.Text, name), mdlIndex, i);
+                                smd_export_show_warnings(mdls, Path.Combine(TxtOutFolder.Text, name), mdlIndex, i);
                             }
                         }
                         break;

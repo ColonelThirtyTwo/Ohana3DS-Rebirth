@@ -6,12 +6,18 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
 namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
 {
     public class SMD
     {
+        public class Error : Exception
+        {
+            public Error(string message) : base(message)
+            {
+            }
+        }
+
         /// <summary>
         ///     Exports a Model to the Source Model format.
         ///     Note: SMD model specification doesnt support Model and Skeletal Animation on the same SMD.
@@ -21,10 +27,12 @@ namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
         /// <param name="fileName">The output File Name</param>
         /// <param name="modelIndex">Index of the model to be exported</param>
         /// <param name="skeletalAnimationIndex">(Optional) Index of the skeletal animation</param>
-        public static void export(RenderBase.OModelGroup model, string fileName, int modelIndex, int skeletalAnimationIndex = -1)
+        /// <returns>List of warnings generated during exporting</returns>
+        public static List<String> export(RenderBase.OModelGroup model, string fileName, int modelIndex, int skeletalAnimationIndex = -1)
         {
             RenderBase.OModel mdl = model.model[modelIndex];
             StringBuilder output = new StringBuilder();
+            var warnings = new List<String>();
 
             output.AppendLine("version 1");
             output.AppendLine("nodes");
@@ -140,11 +148,8 @@ namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
                     }
                 }
 
-                if (error) MessageBox.Show(
-                    "One or more bones uses an animation type unsupported by Source Model!", 
-                    "Warning", 
-                    MessageBoxButtons.OK, 
-                    MessageBoxIcon.Exclamation);
+                if (error)
+                    warnings.Add("One or more bones uses an animation type unsupported by Source Model!");
             }
             output.AppendLine("end");
 
@@ -190,6 +195,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
             }
 
             File.WriteAllText(fileName, output.ToString());
+            return warnings;
         }
 
         private static string getString(float value)
@@ -229,17 +235,11 @@ namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
                     case "version":
                         if (parameters.Length == 1)
                         {
-                            MessageBox.Show(
-                                "Corrupted SMD file! The version isn't specified!", 
-                                "SMD Importer", 
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-                            return null;
+                            throw new Error("Corrupted SMD file! The version isn't specified!");
                         }
                         else if (parameters[1] != "1")
                         {
-                            MessageBox.Show("Unknow SMD version!", "SMD Importer", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return null;
+                            throw new Error("Unrecognized SMD version: "+parameters[1]);
                         }
                         break;
                     case "nodes":
