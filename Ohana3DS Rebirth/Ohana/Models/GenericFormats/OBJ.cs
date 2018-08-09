@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
 {
-    class OBJ
+    public class OBJ
     {
         /// <summary>
         ///     Exports a model to the Wavefront OBJ format.

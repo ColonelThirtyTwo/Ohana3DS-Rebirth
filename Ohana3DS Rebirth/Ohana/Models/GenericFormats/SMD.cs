@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
 {
-    class SMD
+    public class SMD
     {
         /// <summary>
         ///     Exports a Model to the Source Model format.

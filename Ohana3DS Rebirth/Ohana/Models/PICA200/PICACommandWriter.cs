@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Ohana3DS_Rebirth.Ohana.Models.PICA200
 {
-    class PICACommandWriter : IDisposable
+    public class PICACommandWriter : IDisposable
     {
         bool disposed = false;
         BinaryWriter writer;

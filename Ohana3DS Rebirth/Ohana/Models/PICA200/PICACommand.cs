@@ -1,6 +1,6 @@
 ﻿namespace Ohana3DS_Rebirth.Ohana.Models.PICA200
 {
-    class PICACommand
+    public class PICACommand
     {
         public const ushort culling = 0x40;
         public const ushort polygonOffsetEnable = 0x4c;

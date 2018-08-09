@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Ohana3DS_Rebirth.Ohana.Models.PICA200
 {
-    class PICACommandReader
+    public class PICACommandReader
     {
         List<float>[] floatUniform = new List<float>[96];
         List<float> uniform = new List<float>();

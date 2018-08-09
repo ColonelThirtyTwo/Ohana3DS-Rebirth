@@ -2,7 +2,7 @@
 
 namespace Ohana3DS_Rebirth.Ohana
 {
-    class AnimationUtils
+    public class AnimationUtils
     {
         /// <summary>
         ///     Gets the rounded down frame relative to the given Key Frame.

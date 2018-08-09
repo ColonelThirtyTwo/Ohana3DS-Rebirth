@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Ohana3DS_Rebirth.Ohana.Models
 {
-    class MeshUtils
+    public class MeshUtils
     {
         /// <summary>
         ///     Calculates the minimun and maximum vector values for a Model.

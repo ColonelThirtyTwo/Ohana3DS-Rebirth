@@ -2,7 +2,7 @@
 
 namespace Ohana3DS_Rebirth.Ohana.Compressions
 {
-    class LZSS_Ninty
+    public class LZSS_Ninty
     {
         public static byte[] decompress(byte[] buffer)
         {

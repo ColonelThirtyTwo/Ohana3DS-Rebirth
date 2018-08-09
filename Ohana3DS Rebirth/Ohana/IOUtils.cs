@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Ohana3DS_Rebirth.Ohana
 {
-    class IOUtils
+    public class IOUtils
     {
         /// <summary>
         ///     Read an ASCII String from a given Reader at a given address.
