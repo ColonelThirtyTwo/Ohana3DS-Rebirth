@@ -62,7 +62,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
             else
             {
                 bool error = false;
-                for (float frame = 0; frame < model.skeletalAnimation.list[skeletalAnimationIndex].frameSize; frame += 1)
+                for (float frame = 0; frame < model.skeletalAnimation[skeletalAnimationIndex].frameSize; frame += 1)
                 {
                     output.AppendLine("time " + ((int)frame).ToString());
                     for (int index = 0; index < mdl.skeleton.Count; index++)
@@ -71,7 +71,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
                         newBone.parentId = mdl.skeleton[index].parentId;
                         newBone.rotation = new RenderBase.OVector3(mdl.skeleton[index].rotation);
                         newBone.translation = new RenderBase.OVector3(mdl.skeleton[index].translation);
-                        foreach (RenderBase.OSkeletalAnimationBone b in ((RenderBase.OSkeletalAnimation)model.skeletalAnimation.list[skeletalAnimationIndex]).bone)
+                        foreach (RenderBase.OSkeletalAnimationBone b in ((RenderBase.OSkeletalAnimation)model.skeletalAnimation[skeletalAnimationIndex]).bone)
                         {
                             if (b.isFullBakedFormat) error = true;
 
@@ -372,7 +372,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
                                 boneArray[i].rotationZ.endFrame = timeIndex;
                             }
                             anim.bone.AddRange(boneArray);
-                            model.skeletalAnimation.list.Add(anim);
+                            model.skeletalAnimation.Add(anim);
                         }
 
                         break;

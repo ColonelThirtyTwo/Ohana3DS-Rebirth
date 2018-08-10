@@ -60,11 +60,11 @@ namespace Ohana3DS_Rebirth_CLI
                         }
                     }
 
-                    if(model_group.skeletalAnimation.list.Count != 0)
+                    if(model_group.skeletalAnimation.Count != 0)
                     {
                         Console.WriteLine("Skeletal Animations:");
                         uint anim_i = 1;
-                        foreach (var animation in model_group.skeletalAnimation.list)
+                        foreach (var animation in model_group.skeletalAnimation)
                         {
                             Console.WriteLine(String.Format("{0}: {1}", anim_i, animation.name));
                             anim_i++;

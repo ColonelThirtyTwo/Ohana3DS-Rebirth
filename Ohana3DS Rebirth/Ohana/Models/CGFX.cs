@@ -489,7 +489,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models
                     skeletalAnimation.bone.Add(bone);
                 }
 
-                models.skeletalAnimation.list.Add(skeletalAnimation);
+                models.skeletalAnimation.Add(skeletalAnimation);
             }
 
             //Models

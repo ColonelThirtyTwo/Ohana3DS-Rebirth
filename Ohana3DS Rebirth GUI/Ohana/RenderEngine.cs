@@ -68,9 +68,9 @@ namespace Ohana3DS_Rebirth.Ohana
         const string infoHUDFontFamily = "Times New Roman";
         const int infoHUDFontSize = 14;
 
-        public class animationControl
+        public class animationControl<T> where T: RenderBase.OAnimationBase
         {
-            public RenderBase.OAnimationListBase animations;
+            public List<T> animations;
             public float animationStep = 1;
             private int currentAnimation = -1;
             private float frame;
@@ -111,7 +111,7 @@ namespace Ohana3DS_Rebirth.Ohana
                 get
                 {
                     if (currentAnimation > -1)
-                        return frame + " / " + animations.list[currentAnimation].frameSize;
+                        return frame + " / " + animations[currentAnimation].frameSize;
                     else
                         return null;
                 }
@@ -165,15 +165,15 @@ namespace Ohana3DS_Rebirth.Ohana
             {
                 if (!paused && animate)
                 {
-                    float frameSize = animations.list[currentAnimation].frameSize;
+                    float frameSize = animations[currentAnimation].frameSize;
                     if (frame < frameSize) Frame += animationStep; else Frame = 0;
                 }
             }
         }
 
-        public animationControl ctrlSA = new animationControl();
-        public animationControl ctrlMA = new animationControl();
-        public animationControl ctrlVA = new animationControl();
+        public animationControl<RenderBase.OSkeletalAnimation> ctrlSA = new animationControl<RenderBase.OSkeletalAnimation>();
+        public animationControl<RenderBase.OMaterialAnimation> ctrlMA = new animationControl<RenderBase.OMaterialAnimation>();
+        public animationControl<RenderBase.OVisibilityAnimation> ctrlVA = new animationControl<RenderBase.OVisibilityAnimation>();
 
         private int currentModel = -1;
         public int CurrentModel
@@ -606,7 +606,7 @@ namespace Ohana3DS_Rebirth.Ohana
                         transformSkeleton(mdl.skeleton, index, ref skeletonTransform[index]);
                     }
 
-                    List<RenderBase.OSkeletalAnimationBone> bone = ((RenderBase.OSkeletalAnimation)models.skeletalAnimation.list[ctrlSA.CurrentAnimation]).bone;
+                    List<RenderBase.OSkeletalAnimationBone> bone = models.skeletalAnimation[ctrlSA.CurrentAnimation].bone;
                     List<OAnimationBone> frameAnimationSkeleton = new List<OAnimationBone>();
                     for (int index = 0; index < mdl.skeleton.Count; index++)
                     {
@@ -771,7 +771,7 @@ namespace Ohana3DS_Rebirth.Ohana
 
                     if (ctrlVA.animate)
                     {
-                        foreach (RenderBase.OVisibilityAnimationData data in ((RenderBase.OVisibilityAnimation)models.visibilityAnimation.list[ctrlVA.CurrentAnimation]).data)
+                        foreach (RenderBase.OVisibilityAnimationData data in models.visibilityAnimation[ctrlVA.CurrentAnimation].data)
                         {
                             RenderBase.OAnimationKeyFrame frame = AnimationUtils.getLeftFrame(data.visibilityList.keyFrames, ctrlVA.Frame);
                             if (data.name == obj.name) isVisible = frame.bValue;
@@ -791,7 +791,7 @@ namespace Ohana3DS_Rebirth.Ohana
                     borderColor[2] = material.textureMapper[2].borderColor;
                     if (ctrlMA.animate)
                     {
-                        foreach (RenderBase.OMaterialAnimationData data in ((RenderBase.OMaterialAnimation)models.materialAnimation.list[ctrlMA.CurrentAnimation]).data)
+                        foreach (RenderBase.OMaterialAnimationData data in models.materialAnimation[ctrlMA.CurrentAnimation].data)
                         {
                             if (data.name == material.name)
                             {
@@ -818,7 +818,7 @@ namespace Ohana3DS_Rebirth.Ohana
 
                         if (ctrlMA.animate)
                         {
-                            foreach (RenderBase.OMaterialAnimationData data in ((RenderBase.OMaterialAnimation)models.materialAnimation.list[ctrlMA.CurrentAnimation]).data)
+                            foreach (RenderBase.OMaterialAnimationData data in models.materialAnimation[ctrlMA.CurrentAnimation].data)
                             {
                                 if (data.name == material.name)
                                 {
@@ -912,7 +912,7 @@ namespace Ohana3DS_Rebirth.Ohana
 
                         if (ctrlMA.animate)
                         {
-                            RenderBase.OMaterialAnimation ma = (RenderBase.OMaterialAnimation)models.materialAnimation.list[ctrlMA.CurrentAnimation];
+                            RenderBase.OMaterialAnimation ma = models.materialAnimation[ctrlMA.CurrentAnimation];
                             for (int j = 0; j < 3; j++) if (textureId[j] > -1) name[j] = ma.textureName[textureId[j]];
                         }
 
@@ -970,7 +970,7 @@ namespace Ohana3DS_Rebirth.Ohana
                         #region "Material Animation"
                         if (ctrlMA.animate)
                         {
-                            foreach (RenderBase.OMaterialAnimationData data in ((RenderBase.OMaterialAnimation)models.materialAnimation.list[ctrlMA.CurrentAnimation]).data)
+                            foreach (RenderBase.OMaterialAnimationData data in models.materialAnimation[ctrlMA.CurrentAnimation].data)
                             {
                                 if (data.name == material.name)
                                 {

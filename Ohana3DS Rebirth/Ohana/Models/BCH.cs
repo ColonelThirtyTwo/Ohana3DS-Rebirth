@@ -820,7 +820,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models
                     skeletalAnimation.bone.Add(bone);
                 }
 
-                models.skeletalAnimation.list.Add(skeletalAnimation);
+                models.skeletalAnimation.Add(skeletalAnimation);
             }
 
             //Material Animations
@@ -903,7 +903,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models
                     materialAnimation.data.Add(animationData);
                 }
 
-                models.materialAnimation.list.Add(materialAnimation);
+                models.materialAnimation.Add(materialAnimation);
             }
 
             //Visibility Animations
@@ -947,7 +947,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models
                     visibilityAnimation.data.Add(animationData);
                 }
 
-                models.visibilityAnimation.list.Add(visibilityAnimation);
+                models.visibilityAnimation.Add(visibilityAnimation);
             }
 
             //Light Animations
@@ -1044,7 +1044,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models
                     lightAnimation.data.Add(animationData);
                 }
 
-                models.lightAnimation.list.Add(lightAnimation);
+                models.lightAnimation.Add(lightAnimation);
             }
 
             //Camera Animations
@@ -1131,7 +1131,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models
                     cameraAnimation.data.Add(animationData);
                 }
 
-                models.cameraAnimation.list.Add(cameraAnimation);
+                models.cameraAnimation.Add(cameraAnimation);
             }
 
             //Fog Animations
@@ -1198,7 +1198,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models
                     fogAnimation.data.Add(animationData);
                 }
 
-                models.fogAnimation.list.Add(fogAnimation);
+                models.fogAnimation.Add(fogAnimation);
             }
 
             //Scene Environment

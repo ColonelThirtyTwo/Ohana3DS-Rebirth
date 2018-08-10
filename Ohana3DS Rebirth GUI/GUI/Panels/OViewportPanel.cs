@@ -46,9 +46,9 @@ namespace Ohana3DS_Rebirth.GUI
 
             ModelsPanel.launch(renderer);
             TexturesPanel.launch(renderer);
-            SkeletalAnimationsPanel.launch(renderer, FileIO.fileType.skeletalAnimation);
-            MaterialAnimationsPanel.launch(renderer, FileIO.fileType.materialAnimation);
-            VisibilityAnimationsPanel.launch(renderer, FileIO.fileType.visibilityAnimation);
+            SkeletalAnimationsPanel.launch(renderer, renderer.ctrlSA, renderer.models.skeletalAnimation, FileIO.fileType.skeletalAnimation);
+            MaterialAnimationsPanel.launch(renderer, renderer.ctrlMA, renderer.models.materialAnimation, FileIO.fileType.materialAnimation);
+            VisibilityAnimationsPanel.launch(renderer, renderer.ctrlVA, renderer.models.visibilityAnimation, FileIO.fileType.visibilityAnimation);
 
             renderer.render();
         }

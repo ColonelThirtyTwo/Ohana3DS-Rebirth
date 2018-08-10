@@ -23,7 +23,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models.PocketMonsters
 
             foreach (RenderBase.OSkeletalAnimation anm in anms)
             {
-                models.skeletalAnimation.list.Add(anm);
+                models.skeletalAnimation.Add(anm);
             }
 
             return models;

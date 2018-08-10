@@ -3,14 +3,15 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using Ohana3DS_Rebirth.Ohana;
+using System.Collections.Generic;
 
 namespace Ohana3DS_Rebirth.GUI
 {
-    public partial class OAnimationsPanel : UserControl
+    public partial class OAnimationsPanel<T> : UserControl where T : RenderBase.OAnimationBase
     {
         private RenderEngine renderer;
-        private RenderEngine.animationControl control;
-        private RenderBase.OAnimationListBase animations;
+        private RenderEngine.animationControl<T> control;
+        private List<T> animations;
         private FileIO.fileType type;
 
         private bool paused = true;
@@ -21,26 +22,12 @@ namespace Ohana3DS_Rebirth.GUI
             InitializeComponent();
         }
 
-        public void launch(RenderEngine renderEngine, FileIO.fileType type)
+        public void launch(RenderEngine renderEngine, RenderEngine.animationControl<T> control, List<T> animations, FileIO.fileType type)
         {
             renderer = renderEngine;
             this.type = type;
-            switch (type)
-            {
-                case FileIO.fileType.skeletalAnimation:
-                    control = renderer.ctrlSA;
-                    animations = renderer.models.skeletalAnimation;
-                    break;
-                case FileIO.fileType.materialAnimation:
-                    control = renderer.ctrlMA;
-                    animations = renderer.models.materialAnimation;
-                    break;
-                case FileIO.fileType.visibilityAnimation:
-                    control = renderer.ctrlVA;
-                    animations = renderer.models.visibilityAnimation;
-                    break;
-            }
-            
+            this.animations = animations;
+            this.control = control;
             control.FrameChanged += Control_FrameChanged;
             updateList();
         }
@@ -52,7 +39,7 @@ namespace Ohana3DS_Rebirth.GUI
             {
                 control.load(-1);
 
-                foreach (RenderBase.OAnimationBase animation in animations.list)
+                foreach (RenderBase.OAnimationBase animation in animations)
                 {
                     AnimationsList.addItem(animation.name);
                 }
@@ -109,7 +96,7 @@ namespace Ohana3DS_Rebirth.GUI
         private void BtnNext_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left) return;
-            if (control.CurrentAnimation < animations.list.Count - 1)
+            if (control.CurrentAnimation < animations.Count - 1)
             {
                 control.load(control.CurrentAnimation + 1);
                 AnimationsList.SelectedIndex++;
@@ -125,7 +112,7 @@ namespace Ohana3DS_Rebirth.GUI
         {
             if (AnimationsList.SelectedIndex == -1) return;
             isAnimationLoaded = control.load(AnimationsList.SelectedIndex);
-            Seeker.MaximumSeek = (int)animations.list[AnimationsList.SelectedIndex].frameSize;
+            Seeker.MaximumSeek = (int)animations[AnimationsList.SelectedIndex].frameSize;
             Seeker.Value = 0;
         }
 
@@ -151,11 +138,12 @@ namespace Ohana3DS_Rebirth.GUI
 
         private void BtnImport_Click(object sender, EventArgs e)
         {
-            RenderBase.OAnimationListBase animation = (RenderBase.OAnimationListBase)FileExport.import(type);
+            var animation = FileExport.ImportAnimation<T>();
+
             if (animation != null)
             {
-                animations.list.AddRange(animation.list);
-                foreach (RenderBase.OAnimationBase anim in animation.list) AnimationsList.addItem(anim.name);
+                animations.AddRange(animation);
+                foreach (RenderBase.OAnimationBase anim in animation) AnimationsList.addItem(anim.name);
                 AnimationsList.Refresh();
             }
         }
@@ -184,9 +172,9 @@ namespace Ohana3DS_Rebirth.GUI
         private void BtnDelete_Click(object sender, EventArgs e)
         {
             if (AnimationsList.SelectedIndex == -1) return;
-            animations.list.RemoveAt(AnimationsList.SelectedIndex);
+            animations.RemoveAt(AnimationsList.SelectedIndex);
             AnimationsList.removeItem(AnimationsList.SelectedIndex);
-            if (animations.list.Count == 0)
+            if (animations.Count == 0)
             {
                 control.stop();
                 isAnimationLoaded = false;
@@ -202,7 +190,7 @@ namespace Ohana3DS_Rebirth.GUI
             BtnPlayPause.Image = Ohana3DS_Rebirth_GUI.Properties.Resources.ui_icon_play;
             paused = true;
 
-            animations.list.Clear();
+            animations.Clear();
             updateList();
         }
     }

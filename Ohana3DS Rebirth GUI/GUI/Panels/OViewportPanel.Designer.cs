@@ -1,4 +1,6 @@
-﻿namespace Ohana3DS_Rebirth.GUI
+﻿using Ohana3DS_Rebirth.Ohana;
+
+namespace Ohana3DS_Rebirth.GUI
 {
     partial class OViewportPanel
     {
@@ -31,11 +33,11 @@
             this.Screen = new System.Windows.Forms.PictureBox();
             this.Splitter = new System.Windows.Forms.SplitContainer();
             this.VisibilityAnimationsGroup = new Ohana3DS_Rebirth.GUI.OGroupBox();
-            this.VisibilityAnimationsPanel = new Ohana3DS_Rebirth.GUI.OAnimationsPanel();
+            this.VisibilityAnimationsPanel = new Ohana3DS_Rebirth.GUI.OAnimationsPanel<RenderBase.OVisibilityAnimation>();
             this.MaterialAnimationsGroup = new Ohana3DS_Rebirth.GUI.OGroupBox();
-            this.MaterialAnimationsPanel = new Ohana3DS_Rebirth.GUI.OAnimationsPanel();
+            this.MaterialAnimationsPanel = new Ohana3DS_Rebirth.GUI.OAnimationsPanel<RenderBase.OMaterialAnimation>();
             this.SkeletalAnimationsGroup = new Ohana3DS_Rebirth.GUI.OGroupBox();
-            this.SkeletalAnimationsPanel = new Ohana3DS_Rebirth.GUI.OAnimationsPanel();
+            this.SkeletalAnimationsPanel = new Ohana3DS_Rebirth.GUI.OAnimationsPanel<RenderBase.OSkeletalAnimation>();
             this.TexturesGroup = new Ohana3DS_Rebirth.GUI.OGroupBox();
             this.TexturesPanel = new Ohana3DS_Rebirth.GUI.OTexturesPanel();
             this.ModelsGroup = new Ohana3DS_Rebirth.GUI.OGroupBox();
@@ -303,11 +305,11 @@
         private OModelsPanel ModelsPanel;
         private OGroupBox TexturesGroup;
         private OGroupBox VisibilityAnimationsGroup;
-        private OAnimationsPanel VisibilityAnimationsPanel;
+        private OAnimationsPanel<RenderBase.OVisibilityAnimation> VisibilityAnimationsPanel;
         private OGroupBox MaterialAnimationsGroup;
-        private OAnimationsPanel MaterialAnimationsPanel;
+        private OAnimationsPanel<RenderBase.OMaterialAnimation> MaterialAnimationsPanel;
         private OGroupBox SkeletalAnimationsGroup;
-        private OAnimationsPanel SkeletalAnimationsPanel;
+        private OAnimationsPanel<RenderBase.OSkeletalAnimation> SkeletalAnimationsPanel;
         private OTexturesPanel TexturesPanel;
     }
 }

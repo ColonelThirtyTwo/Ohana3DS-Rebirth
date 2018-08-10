@@ -37,7 +37,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models.PocketMonsters
                 switch (loaded.type)
                 {
                     case FileIO.formatType.model: models.merge((RenderBase.OModelGroup)loaded.data); break;
-                    case FileIO.formatType.anims: models.skeletalAnimation.list.Add((RenderBase.OSkeletalAnimation)loaded.data); break;
+                    case FileIO.formatType.anims: models.skeletalAnimation.Add((RenderBase.OSkeletalAnimation)loaded.data); break;
                     case FileIO.formatType.image: models.texture.Add((RenderBase.OTexture)loaded.data); break;
                 }
             }

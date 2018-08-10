@@ -1948,20 +1948,6 @@ namespace Ohana3DS_Rebirth.Ohana
         }
 
         /// <summary>
-        ///     Base class of list with animation.
-        ///     It is used as a generic way to access all animation, casting each list element as appropriate.
-        /// </summary>
-        public class OAnimationListBase
-        {
-            public List<OAnimationBase> list;
-
-            public OAnimationListBase()
-            {
-                list = new List<OAnimationBase>();
-            }
-        }
-
-        /// <summary>
         ///     Represents a Skeletal Animation.
         /// </summary>
         public class OSkeletalAnimation : OAnimationBase
@@ -2246,12 +2232,12 @@ namespace Ohana3DS_Rebirth.Ohana
             public List<OLight> light;
             public List<OCamera> camera;
             public List<OFog> fog;
-            public OAnimationListBase skeletalAnimation;
-            public OAnimationListBase materialAnimation;
-            public OAnimationListBase visibilityAnimation;
-            public OAnimationListBase lightAnimation;
-            public OAnimationListBase cameraAnimation;
-            public OAnimationListBase fogAnimation;
+            public List<OSkeletalAnimation> skeletalAnimation;
+            public List<OMaterialAnimation> materialAnimation;
+            public List<OVisibilityAnimation> visibilityAnimation;
+            public List<OLightAnimation> lightAnimation;
+            public List<OCameraAnimation> cameraAnimation;
+            public List<OFogAnimation> fogAnimation;
             public List<OScene> scene;
 
             public OModelGroup()
@@ -2262,12 +2248,12 @@ namespace Ohana3DS_Rebirth.Ohana
                 light = new List<OLight>();
                 camera = new List<OCamera>();
                 fog = new List<OFog>();
-                skeletalAnimation = new OAnimationListBase();
-                materialAnimation = new OAnimationListBase();
-                visibilityAnimation = new OAnimationListBase();
-                lightAnimation = new OAnimationListBase();
-                cameraAnimation = new OAnimationListBase();
-                fogAnimation = new OAnimationListBase();
+                skeletalAnimation = new List<OSkeletalAnimation>();
+                materialAnimation = new List<OMaterialAnimation>();
+                visibilityAnimation = new List<OVisibilityAnimation>();
+                lightAnimation = new List<OLightAnimation>();
+                cameraAnimation = new List<OCameraAnimation>();
+                fogAnimation = new List<OFogAnimation>();
                 scene = new List<OScene>();
             }
 
@@ -2283,12 +2269,12 @@ namespace Ohana3DS_Rebirth.Ohana
                 light.AddRange(data.light);
                 camera.AddRange(data.camera);
                 fog.AddRange(data.fog);
-                skeletalAnimation.list.AddRange(data.skeletalAnimation.list);
-                materialAnimation.list.AddRange(data.materialAnimation.list);
-                visibilityAnimation.list.AddRange(data.visibilityAnimation.list);
-                lightAnimation.list.AddRange(data.lightAnimation.list);
-                cameraAnimation.list.AddRange(data.cameraAnimation.list);
-                fogAnimation.list.AddRange(data.fogAnimation.list);
+                skeletalAnimation.AddRange(data.skeletalAnimation);
+                materialAnimation.AddRange(data.materialAnimation);
+                visibilityAnimation.AddRange(data.visibilityAnimation);
+                lightAnimation.AddRange(data.lightAnimation);
+                cameraAnimation.AddRange(data.cameraAnimation);
+                fogAnimation.AddRange(data.fogAnimation);
                 scene.AddRange(data.scene);
             }
         }

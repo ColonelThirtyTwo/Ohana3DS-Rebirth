@@ -1,6 +1,8 @@
-﻿namespace Ohana3DS_Rebirth.GUI
+﻿using Ohana3DS_Rebirth.Ohana;
+
+namespace Ohana3DS_Rebirth.GUI
 {
-    partial class OAnimationsPanel
+    partial class OAnimationsPanel<T> where T : RenderBase.OAnimationBase
     {
         /// <summary> 
         /// Variável de designer necessária.

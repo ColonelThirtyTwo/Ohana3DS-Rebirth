@@ -113,9 +113,9 @@ namespace Ohana3DS_Rebirth.GUI.Forms
                         smd_export_show_warnings(mdls, fileName + ".smd", mdlIndex);
                         if (ChkExportAllAnimations.Checked)
                         {
-                            for (int i = 0; i < mdls.skeletalAnimation.list.Count; i++)
+                            for (int i = 0; i < mdls.skeletalAnimation.Count; i++)
                             {
-                                string name = mdls.skeletalAnimation.list[i].name + ".smd";
+                                string name = mdls.skeletalAnimation[i].name + ".smd";
                                 smd_export_show_warnings(mdls, Path.Combine(TxtOutFolder.Text, name), mdlIndex, i);
                             }
                         }
