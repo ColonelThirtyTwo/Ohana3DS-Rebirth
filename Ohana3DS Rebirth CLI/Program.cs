@@ -14,9 +14,19 @@ namespace Ohana3DS_Rebirth_CLI
         [HelpOption]
         public string GetUsage()
         {
-            return HelpText.AutoBuild(this,
-              (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current), true);
+            var help = HelpText.AutoBuild(this);
+            help.AddPreOptionsLine("\nUsage: info <in-file>");
+            return help;
         }
+    }
+
+    class ExportOptions
+    {
+        [ValueOption(0)]
+        public string InFile { get; set; }
+
+        [ValueOption(1)]
+        public string OutDirectory { get; set; }
     }
 
     class Options
@@ -33,7 +43,15 @@ namespace Ohana3DS_Rebirth_CLI
         [HelpVerbOption]
         public string GetUsage(string verb)
         {
-            return HelpText.AutoBuild(this, verb);
+            switch(verb)
+            {
+                case null:
+                case "":
+                    return this.GetUsage();
+                case "info":
+                    return new InfoOptions().GetUsage();
+            }
+            throw new Exception("Unrecognized verb: " + verb);
         }
     }
 
