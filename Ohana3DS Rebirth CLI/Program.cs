@@ -5,17 +5,34 @@ using System;
 
 namespace Ohana3DS_Rebirth_CLI
 {
-
-    class Options
+    class InfoOptions
     {
-        [Option('i', "inputfile", Required = true, HelpText = "Input file")]
+        [ValueOption(0)]
         public string InFile { get; set; }
 
         [HelpOption]
         public string GetUsage()
         {
             return HelpText.AutoBuild(this,
-              (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
+              (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current), true);
+        }
+    }
+
+    class Options
+    {
+        [VerbOption("info", HelpText = "Shows information about a file")]
+        public InfoOptions InfoOptions { get; set; }
+
+        [HelpOption]
+        public string GetUsage()
+        {
+            return HelpText.AutoBuild(this,
+              (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current), true);
+        }
+        [HelpVerbOption]
+        public string GetUsage(string verb)
+        {
+            return HelpText.AutoBuild(this, verb);
         }
     }
 
@@ -25,57 +42,73 @@ namespace Ohana3DS_Rebirth_CLI
         static int Main(string[] args)
         {
             var options = new Options();
-            if(!Parser.Default.ParseArguments(args, options))
+            string verb = null;
+            object sub_options = null;
+            if(!Parser.Default.ParseArgumentsStrict(args, options, (the_verb, the_options) => { verb = the_verb; sub_options = the_options; }))
             {
-                //Console.WriteLine(options.GetUsage());
                 Environment.Exit(Parser.DefaultExitCodeFail);
             }
-
-            var file = FileIO.load(options.InFile);
-            switch (file.type)
+            
+            if(verb == "info")
             {
-                case FileIO.formatType.model:
-                    var model_group = (RenderBase.OModelGroup)file.data;
-                    Console.WriteLine("File type: model");
+                var info_options = (InfoOptions)sub_options;
+                if (info_options.InFile == null) // Dear CommandLineParser v1.9, please support required positional arguments
+                {
+                    Console.WriteLine("Missing input file");
+                    Environment.Exit(Parser.DefaultExitCodeFail);
+                }
 
-                    if(model_group.model.Count != 0)
-                    {
-                        Console.WriteLine("Models:");
-                        uint model_i = 1;
-                        foreach (var model in model_group.model)
+                var file = FileIO.load(info_options.InFile);
+                switch (file.type)
+                {
+                    case FileIO.formatType.model:
+                        var model_group = (RenderBase.OModelGroup)file.data;
+                        Console.WriteLine("File type: model");
+
+                        if (model_group.model.Count != 0)
                         {
-                            Console.WriteLine(String.Format("{0}: {1} ({2} meshes, {3} vertices)", model_i, model.name, model.mesh.Count, model.verticesCount));
-                            model_i++;
+                            Console.WriteLine("Models:");
+                            uint model_i = 1;
+                            foreach (var model in model_group.model)
+                            {
+                                Console.WriteLine(String.Format("{0}: {1} ({2} meshes, {3} vertices)", model_i, model.name, model.mesh.Count, model.verticesCount));
+                                model_i++;
+                            }
                         }
-                    }
 
-                    if(model_group.texture.Count != 0)
-                    {
-                        Console.WriteLine("Textures:");
-                        uint i = 1;
-                        foreach (var texture in model_group.texture)
+                        if (model_group.texture.Count != 0)
                         {
-                            Console.WriteLine(String.Format("{0}: {1}", i, texture.name));
-                            i++;
+                            Console.WriteLine("Textures:");
+                            uint i = 1;
+                            foreach (var texture in model_group.texture)
+                            {
+                                Console.WriteLine(String.Format("{0}: {1}", i, texture.name));
+                                i++;
+                            }
                         }
-                    }
 
-                    if(model_group.skeletalAnimation.Count != 0)
-                    {
-                        Console.WriteLine("Skeletal Animations:");
-                        uint anim_i = 1;
-                        foreach (var animation in model_group.skeletalAnimation)
+                        if (model_group.skeletalAnimation.Count != 0)
                         {
-                            Console.WriteLine(String.Format("{0}: {1}", anim_i, animation.name));
-                            anim_i++;
+                            Console.WriteLine("Skeletal Animations:");
+                            uint anim_i = 1;
+                            foreach (var animation in model_group.skeletalAnimation)
+                            {
+                                Console.WriteLine(String.Format("{0}: {1}", anim_i, animation.name));
+                                anim_i++;
+                            }
                         }
-                    }
 
-                    return 0;
-                default:
-                    Console.WriteLine("Unrecognized file");
-                    return 1;
+                        return 0;
+                    default:
+                        Console.WriteLine("Unrecognized file");
+                        return 1;
+                }
             }
+            else
+            {
+                throw new Exception("Unrecognized verb: " + verb);
+            }
+            
         }
     }
 }
