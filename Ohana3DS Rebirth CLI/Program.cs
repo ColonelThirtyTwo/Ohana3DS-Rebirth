@@ -93,7 +93,7 @@ namespace Ohana3DS_Rebirth_CLI
                             uint anim_i = 1;
                             foreach (var animation in model_group.skeletalAnimation)
                             {
-                                Console.WriteLine(String.Format("{0}: {1}", anim_i, animation.name));
+                                Console.WriteLine(String.Format("{0}: {1} ({2} frames)", anim_i, animation.name, animation.frameSize));
                                 anim_i++;
                             }
                         }

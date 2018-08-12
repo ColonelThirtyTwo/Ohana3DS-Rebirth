@@ -71,7 +71,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models.GenericFormats
                         newBone.parentId = mdl.skeleton[index].parentId;
                         newBone.rotation = new RenderBase.OVector3(mdl.skeleton[index].rotation);
                         newBone.translation = new RenderBase.OVector3(mdl.skeleton[index].translation);
-                        foreach (RenderBase.OSkeletalAnimationBone b in ((RenderBase.OSkeletalAnimation)model.skeletalAnimation[skeletalAnimationIndex]).bone)
+                        foreach (RenderBase.OSkeletalAnimationBone b in model.skeletalAnimation[skeletalAnimationIndex].bone)
                         {
                             if (b.isFullBakedFormat) error = true;
 
