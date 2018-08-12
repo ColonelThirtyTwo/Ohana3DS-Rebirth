@@ -115,7 +115,7 @@ namespace Ohana3DS_Rebirth.GUI.Forms
                         {
                             for (int i = 0; i < mdls.skeletalAnimation.Count; i++)
                             {
-                                string name = mdls.skeletalAnimation[i].name + ".smd";
+                                string name = String.Format("{0} ({1}).smd", mdls.skeletalAnimation[i].name, i);
                                 smd_export_show_warnings(mdls, Path.Combine(TxtOutFolder.Text, name), mdlIndex, i);
                             }
                         }
