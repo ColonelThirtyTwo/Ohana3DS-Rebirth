@@ -2,6 +2,7 @@
 using CommandLine.Text;
 using Ohana3DS_Rebirth.Ohana;
 using System;
+using System.IO;
 
 namespace Ohana3DS_Rebirth_CLI
 {
@@ -55,10 +56,19 @@ namespace Ohana3DS_Rebirth_CLI
                 if (info_options.InFile == null) // Dear CommandLineParser v1.9, please support required positional arguments
                 {
                     Console.WriteLine("Missing input file");
-                    Environment.Exit(Parser.DefaultExitCodeFail);
+                    return Parser.DefaultExitCodeFail;
                 }
 
-                var file = FileIO.load(info_options.InFile);
+                FileIO.file file;
+                try
+                {
+                    file = FileIO.load(info_options.InFile);
+                }
+                catch (IOException ex)
+                {
+                    Console.WriteLine("Could not open file: " + ex.Message);
+                    return 1;
+                }
                 switch (file.type)
                 {
                     case FileIO.formatType.model:
