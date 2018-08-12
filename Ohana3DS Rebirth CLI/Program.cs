@@ -1,8 +1,11 @@
 ﻿using CommandLine;
 using CommandLine.Text;
 using Ohana3DS_Rebirth.Ohana;
+using Ohana3DS_Rebirth.Ohana.Models.GenericFormats;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Ohana3DS_Rebirth_CLI
 {
@@ -49,7 +52,7 @@ namespace Ohana3DS_Rebirth_CLI
             }
             catch (IOException ex)
             {
-                Console.WriteLine("Could not open file: " + ex.Message);
+                Console.Error.WriteLine("Could not open file: " + ex.Message);
                 return 1;
             }
             switch (file.type)
@@ -93,9 +96,148 @@ namespace Ohana3DS_Rebirth_CLI
 
                     return 0;
                 default:
-                    Console.WriteLine("Unrecognized file");
+                    Console.Error.WriteLine("Unrecognized file type");
                     return 1;
             }
+        }
+    }
+
+    class ExportOptions: VerbBase
+    {
+        [ValueOption(0)]
+        public string InFile { get; set; }
+
+        [ValueOption(0)]
+        public string OutDirectory { get; set; }
+
+        [OptionArray('a', "import-anims", Required = false, HelpText = "Files to import skeletal animations from before exporting")]
+        public string[] AnimImports { get; set; }
+
+        [HelpOption]
+        public string GetUsage()
+        {
+            var help = HelpText.AutoBuild(this);
+            help.AddPreOptionsLine("\nUsage: export <in-file> <out-directory>");
+            return help;
+        }
+
+        public override int Execute()
+        {
+            if (this.InFile == null || this.OutDirectory == null)
+            {
+                Console.WriteLine(this.GetUsage());
+                return Parser.DefaultExitCodeFail;
+            }
+
+            FileIO.file file;
+            try
+            {
+                file = FileIO.load(this.InFile);
+            }
+            catch (IOException ex)
+            {
+                Console.Error.WriteLine("Could not open file: " + ex.Message);
+                return 1;
+            }
+
+            var model_group = file.data as RenderBase.OModelGroup;
+            if(model_group == null)
+            {
+                Console.Error.WriteLine("Unrecognized file type");
+                return 1;
+            }
+
+            // Import animations
+            if (this.AnimImports != null)
+            {
+                foreach (var import_path in this.AnimImports)
+                {
+                    FileIO.file import_file;
+                    try
+                    {
+                        import_file = FileIO.load(import_path);
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.Error.WriteLine("Could not open file: " + ex.Message);
+                        return 1;
+                    }
+
+                    var import_model_group = import_file.data as RenderBase.OModelGroup;
+                    if (import_model_group == null)
+                    {
+                        Console.Error.WriteLine("Unrecognized file type for animation import " + import_path);
+                        return 1;
+                    }
+
+                    model_group.skeletalAnimation.AddRange(import_model_group.skeletalAnimation);
+                }
+            }
+
+            // Export models
+            var duplicate_model_name_counters = model_group.model.GroupBy((v) => v.name).Where(g => g.Count() > 1).Select(g => g.Key).ToDictionary(name => name, name => 0);
+            for(int i = 0; i < model_group.model.Count; i++)
+            {
+                var model = model_group.model[i];
+                var name = model.name;
+                if(duplicate_model_name_counters.ContainsKey(name))
+                {
+                    duplicate_model_name_counters[name] += 1;
+                    name = String.Format("{0} ({1})", name, duplicate_model_name_counters[name]);
+                }
+                string path = Path.Combine(this.OutDirectory, name + ".model.smd");
+                Console.WriteLine("Exporting " + path);
+                var warnings = SMD.export(model_group, path, i);
+                foreach(var warning in warnings)
+                {
+                    Console.Error.WriteLine("Warning when exporting " + name + ": " + warning);
+                }
+            }
+
+            // Export animations
+            // TODO: support selecting the model to apply animations to
+            if (model_group.model.Count != 0)
+            {
+                var duplicate_anim_name_counters = model_group.skeletalAnimation.GroupBy((v) => v.name).Where(g => g.Count() > 1).Select(g => g.Key).ToDictionary(name => name, name => 0);
+                for (int i = 0; i < model_group.skeletalAnimation.Count; i++)
+                {
+                    var anim = model_group.skeletalAnimation[i];
+                    var name = anim.name;
+                    if (duplicate_anim_name_counters.ContainsKey(name))
+                    {
+                        duplicate_anim_name_counters[name] += 1;
+                        name = String.Format("{0} ({1})", name, duplicate_anim_name_counters[name]);
+                    }
+                    string path = Path.Combine(this.OutDirectory, name + ".anim.smd");
+                    Console.WriteLine("Exporting " + path);
+                    var warnings = SMD.export(model_group, path, 0, i);
+                    foreach (var warning in warnings)
+                    {
+                        Console.Error.WriteLine("Warning when exporting " + name + ": " + warning);
+                    }
+                }
+            }
+            else if (model_group.skeletalAnimation.Count != 0)
+            {
+                Console.Error.WriteLine("Warning: File contains animations but no models. Animations will not be exported.");
+            }
+
+            // Export textures
+            var duplicate_texture_name_counters = model_group.texture.GroupBy((v) => v.name).Where(g => g.Count() > 1).Select(g => g.Key).ToDictionary(name => name, name => 0);
+            foreach(var texture in model_group.texture)
+            {
+                var name = texture.name;
+                if (duplicate_texture_name_counters.ContainsKey(name))
+                {
+                    duplicate_texture_name_counters[name] += 1;
+                    name = String.Format("{0} ({1})", name, duplicate_texture_name_counters[name]);
+                }
+                string path = Path.Combine(this.OutDirectory, name + ".png");
+                Console.WriteLine("Exporting " + path);
+                texture.texture.Save(path);
+            }
+
+            return 0;
         }
     }
 
@@ -103,6 +245,9 @@ namespace Ohana3DS_Rebirth_CLI
     {
         [VerbOption("info", HelpText = "Shows information about a file")]
         public InfoOptions InfoOptions { get; set; }
+
+        [VerbOption("export", HelpText = "Exports data from a file")]
+        public ExportOptions ExportOptions { get; set; }
 
         [HelpOption]
         public string GetUsage()
@@ -117,9 +262,12 @@ namespace Ohana3DS_Rebirth_CLI
             {
                 case null:
                 case "":
+                case "help":
                     return this.GetUsage();
                 case "info":
                     return new InfoOptions().GetUsage();
+                case "export":
+                    return new ExportOptions().GetUsage();
             }
             throw new Exception("Unrecognized verb: " + verb);
         }
