@@ -174,67 +174,190 @@ namespace Ohana3DS_Rebirth_CLI
                 }
             }
 
-            // Export models
-            var duplicate_model_name_counters = model_group.model.GroupBy((v) => v.name).Where(g => g.Count() > 1).Select(g => g.Key).ToDictionary(name => name, name => 0);
-            for(int i = 0; i < model_group.model.Count; i++)
+            try
             {
-                var model = model_group.model[i];
-                var name = model.name;
-                if(duplicate_model_name_counters.ContainsKey(name))
+                Directory.CreateDirectory(this.OutDirectory);
+            }
+            catch(IOException ex)
+            {
+                Console.Error.WriteLine("Could not create output directory: " + ex.Message);
+                return 1;
+            }
+
+            try
+            {
+                model_group.Export(this.OutDirectory);
+            }
+            catch (IOException ex)
+            {
+                Console.Error.WriteLine("Could export model: " + ex.Message);
+                return 1;
+            }
+
+
+            return 0;
+        }
+    }
+
+    class PokemonBatchExportOptions : VerbBase
+    {
+        [ValueOption(0)]
+        public string InDirectory { get; set; }
+
+        [ValueOption(0)]
+        public string OutDirectory { get; set; }
+
+        [HelpOption]
+        public string GetUsage()
+        {
+            var help = HelpText.AutoBuild(this);
+            help.AddPreOptionsLine("\nUsage: pokemon-batch-export <in-folder> <out-folder>");
+            help.AddPreOptionsLine("The model for each Pokemon is split across several files, consisting of one mesh file, several texture files, and several animation files.");
+            help.AddPreOptionsLine("This command combines and exports that data for each Pokemon.");
+            return help;
+        }
+
+        public override int Execute()
+        {
+            if (this.InDirectory == null || this.OutDirectory == null)
+            {
+                Console.WriteLine(this.GetUsage());
+                return Parser.DefaultExitCodeFail;
+            }
+
+            try
+            {
+                Directory.CreateDirectory(this.OutDirectory);
+            }
+            catch (IOException ex)
+            {
+                Console.Error.WriteLine("Could not create output directory: " + ex.Message);
+                return 1;
+            }
+
+            string[] files;
+            try
+            {
+                files = Directory.GetFiles(this.InDirectory, "*.bin").Select(filename => Path.GetFileName(filename)).OrderBy(v=>v).ToArray();
+            }
+            catch (IOException ex)
+            {
+                Console.Error.WriteLine("Could not access input directory: " + ex.Message);
+                return 1;
+            }
+
+            Console.WriteLine("Reading from " + this.InDirectory + ", exporting to " + this.OutDirectory);
+
+            string current_name = null;
+            string current_folder_name = null;
+            RenderBase.OModelGroup current_group = null;
+            foreach(var filename in files)
+            {
+                Console.WriteLine("Reading file " + filename);
+                FileIO.file import_file;
+                try
                 {
-                    duplicate_model_name_counters[name] += 1;
-                    name = String.Format("{0} ({1})", name, duplicate_model_name_counters[name]);
+                    import_file = FileIO.load(Path.Combine(this.InDirectory, filename));
                 }
-                string path = Path.Combine(this.OutDirectory, name + ".model.smd");
-                Console.WriteLine("Exporting " + path);
-                var warnings = SMD.export(model_group, path, i);
-                foreach(var warning in warnings)
+                catch (IOException ex)
                 {
-                    Console.Error.WriteLine("Warning when exporting " + name + ": " + warning);
+                    Console.Error.WriteLine("Could not open file: " + ex.Message);
+                    return 1;
+                }
+
+                RenderBase.OModelGroup this_group = import_file.data as RenderBase.OModelGroup;
+                if (this_group == null)
+                {
+                    Console.Error.WriteLine("Unrecognized file type for file " + Path.Combine(this.InDirectory, filename) + "; skipping");
+                    continue;
+                }
+
+                if (this_group.model.Count != 0)
+                {
+                    // Starting new model, export the old one
+                    if (current_name != null)
+                    {
+                        try
+                        {
+                            current_group.ExportModels(current_folder_name);
+                            current_group.ExportSkeletalAnimations(0, current_folder_name);
+                        }
+                        catch (IOException ex)
+                        {
+                            Console.Error.WriteLine("Could not export " + current_name + ": " + ex.Message);
+                            return 1;
+                        }
+                    }
+
+                    // Move to next one
+                    current_name = filename;
+                    current_folder_name = Path.Combine(this.OutDirectory, filename + "_exported");
+                    current_group = this_group;
+                    Console.WriteLine("Model found: " + current_name);
+                    try
+                    {
+                        Directory.CreateDirectory(current_folder_name);
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.Error.WriteLine("Could not create " + current_folder_name + ": " + ex.Message);
+                        return 1;
+                    }
+                }
+                else if (this_group.skeletalAnimation.Count != 0)
+                {
+                    // Append animations to model
+                    if (current_name == null)
+                    {
+                        Console.Error.WriteLine(filename + " contains animations not corresponding to any model, skipping.");
+                        continue;
+                    }
+
+                    current_group.skeletalAnimation.AddRange(this_group.skeletalAnimation);
+                }
+
+                if(this_group.texture.Count != 0)
+                {
+                    // Export textures
+                    if (current_name == null)
+                    {
+                        Console.Error.WriteLine(filename + " contains texture not corresponding to any model, skipping.");
+                        continue;
+                    }
+
+                    string texture_folder_name = Path.Combine(current_folder_name, filename);
+                    try
+                    {
+                        Directory.CreateDirectory(texture_folder_name);
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.Error.WriteLine("Could not create " + current_folder_name + ": " + ex.Message);
+                        return 1;
+                    }
+
+                    this_group.ExportTextures(texture_folder_name);
                 }
             }
 
-            // Export animations
-            // TODO: support selecting the model to apply animations to
-            if (model_group.model.Count != 0)
+            // Export last model
+            if(current_name != null)
             {
-                var duplicate_anim_name_counters = model_group.skeletalAnimation.GroupBy((v) => v.name).Where(g => g.Count() > 1).Select(g => g.Key).ToDictionary(name => name, name => 0);
-                for (int i = 0; i < model_group.skeletalAnimation.Count; i++)
+                try
                 {
-                    var anim = model_group.skeletalAnimation[i];
-                    var name = anim.name;
-                    if (duplicate_anim_name_counters.ContainsKey(name))
-                    {
-                        duplicate_anim_name_counters[name] += 1;
-                        name = String.Format("{0} ({1})", name, duplicate_anim_name_counters[name]);
-                    }
-                    string path = Path.Combine(this.OutDirectory, name + ".anim.smd");
-                    Console.WriteLine("Exporting " + path);
-                    var warnings = SMD.export(model_group, path, 0, i);
-                    foreach (var warning in warnings)
-                    {
-                        Console.Error.WriteLine("Warning when exporting " + name + ": " + warning);
-                    }
+                    current_group.ExportModels(current_folder_name);
+                    current_group.ExportSkeletalAnimations(0, current_folder_name);
+                }
+                catch (IOException ex)
+                {
+                    Console.Error.WriteLine("Could not export " + current_name + ": " + ex.Message);
+                    return 1;
                 }
             }
-            else if (model_group.skeletalAnimation.Count != 0)
+            else
             {
-                Console.Error.WriteLine("Warning: File contains animations but no models. Animations will not be exported.");
-            }
-
-            // Export textures
-            var duplicate_texture_name_counters = model_group.texture.GroupBy((v) => v.name).Where(g => g.Count() > 1).Select(g => g.Key).ToDictionary(name => name, name => 0);
-            foreach(var texture in model_group.texture)
-            {
-                var name = texture.name;
-                if (duplicate_texture_name_counters.ContainsKey(name))
-                {
-                    duplicate_texture_name_counters[name] += 1;
-                    name = String.Format("{0} ({1})", name, duplicate_texture_name_counters[name]);
-                }
-                string path = Path.Combine(this.OutDirectory, name + ".png");
-                Console.WriteLine("Exporting " + path);
-                texture.texture.Save(path);
+                Console.Error.WriteLine("No files found in " + this.InDirectory);
+                return 1;
             }
 
             return 0;
@@ -248,6 +371,9 @@ namespace Ohana3DS_Rebirth_CLI
 
         [VerbOption("export", HelpText = "Exports data from a file")]
         public ExportOptions ExportOptions { get; set; }
+
+        [VerbOption("pokemon-batch-export", HelpText = "Combines and exports pokemon models")]
+        public PokemonBatchExportOptions PokemonBatchExportOptions { get; set; }
 
         [HelpOption]
         public string GetUsage()
@@ -268,13 +394,97 @@ namespace Ohana3DS_Rebirth_CLI
                     return new InfoOptions().GetUsage();
                 case "export":
                     return new ExportOptions().GetUsage();
+                case "pokemon-batch-export":
+                    return new PokemonBatchExportOptions().GetUsage();
             }
             throw new Exception("Unrecognized verb: " + verb);
         }
     }
 
-    class Program
+    static class Program
     {
+        /// <summary>
+        /// Exports models, animations, and textures in a model group to a directory
+        /// </summary>
+        /// <param name="model_group"></param>
+        /// <param name="out_directory"></param>
+        public static void Export(this RenderBase.OModelGroup model_group, string out_directory)
+        {
+            model_group.ExportModels(out_directory);
+
+            // TODO: support selecting the model to apply animations to
+            if (model_group.model.Count != 0)
+            {
+                model_group.ExportSkeletalAnimations(0, out_directory);
+            }
+            else if (model_group.skeletalAnimation.Count != 0)
+            {
+                Console.Error.WriteLine("Warning: File contains animations but no models. Animations will not be exported.");
+            }
+            
+            model_group.ExportTextures(out_directory);
+        }
+
+        public static void ExportModels(this RenderBase.OModelGroup model_group, string out_directory)
+        {
+            var duplicate_model_name_counters = model_group.model.GroupBy((v) => v.name).Where(g => g.Count() > 1).Select(g => g.Key).ToDictionary(name => name, name => 0);
+            for (int i = 0; i < model_group.model.Count; i++)
+            {
+                var model = model_group.model[i];
+                var name = model.name;
+                if (duplicate_model_name_counters.ContainsKey(name))
+                {
+                    duplicate_model_name_counters[name] += 1;
+                    name = String.Format("{0} ({1})", name, duplicate_model_name_counters[name]);
+                }
+                string path = Path.Combine(out_directory, name + ".model.smd");
+                Console.WriteLine("Exporting " + path);
+                var warnings = SMD.export(model_group, path, i);
+                foreach (var warning in warnings)
+                {
+                    Console.Error.WriteLine("Warning when exporting " + name + ": " + warning);
+                }
+            }
+        }
+
+        public static void ExportSkeletalAnimations(this RenderBase.OModelGroup model_group, int model_index, string out_directory)
+        {
+            var duplicate_anim_name_counters = model_group.skeletalAnimation.GroupBy((v) => v.name).Where(g => g.Count() > 1).Select(g => g.Key).ToDictionary(name => name, name => 0);
+            for (int i = 0; i < model_group.skeletalAnimation.Count; i++)
+            {
+                var anim = model_group.skeletalAnimation[i];
+                var name = anim.name;
+                if (duplicate_anim_name_counters.ContainsKey(name))
+                {
+                    duplicate_anim_name_counters[name] += 1;
+                    name = String.Format("{0} ({1})", name, duplicate_anim_name_counters[name]);
+                }
+                string path = Path.Combine(out_directory, name + ".anim.smd");
+                Console.WriteLine("Exporting " + path);
+                var warnings = SMD.export(model_group, path, model_index, i);
+                foreach (var warning in warnings)
+                {
+                    Console.Error.WriteLine("Warning when exporting " + name + ": " + warning);
+                }
+            }
+        }
+
+        public static void ExportTextures(this RenderBase.OModelGroup model_group, string out_directory)
+        {
+            var duplicate_texture_name_counters = model_group.texture.GroupBy((v) => v.name).Where(g => g.Count() > 1).Select(g => g.Key).ToDictionary(name => name, name => 0);
+            foreach (var texture in model_group.texture)
+            {
+                var name = texture.name;
+                if (duplicate_texture_name_counters.ContainsKey(name))
+                {
+                    duplicate_texture_name_counters[name] += 1;
+                    name = String.Format("{0} ({1})", name, duplicate_texture_name_counters[name]);
+                }
+                string path = Path.Combine(out_directory, name + ".png");
+                Console.WriteLine("Exporting " + path);
+                texture.texture.Save(path);
+            }
+        }
 
         static int Main(string[] args)
         {
