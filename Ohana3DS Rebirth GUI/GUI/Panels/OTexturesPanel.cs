@@ -9,11 +9,13 @@ namespace Ohana3DS_Rebirth.GUI
     public partial class OTexturesPanel : UserControl, IPanel
     {
         RenderEngine renderer;
-
+        
         public OTexturesPanel()
         {
             InitializeComponent();
         }
+
+        event EventHandler<OpenSubResourceArgs> IPanel.OpenSubResource { add {} remove {} }
 
         public void launch(object data)
         {
@@ -83,6 +85,16 @@ namespace Ohana3DS_Rebirth.GUI
         {
             TextureList.flush(true);
             if (renderer != null) renderer.removeAllTextures();
+        }
+
+        void IPanel.finalize()
+        {
+            throw new NotImplementedException();
+        }
+
+        void IPanel.launch(object data)
+        {
+            throw new NotImplementedException();
         }
     }
 }

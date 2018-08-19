@@ -14,6 +14,8 @@ namespace Ohana3DS_Rebirth.GUI
             InitializeComponent();
         }
 
+        event EventHandler<OpenSubResourceArgs> IPanel.OpenSubResource { add { } remove { } }
+
         public void finalize()
         {
             //Nothing to dispose here

@@ -3,12 +3,14 @@ using System.Windows.Forms;
 
 using Ohana3DS_Rebirth.Ohana.Containers;
 using Ohana3DS_Rebirth.Ohana.Compressions;
+using System;
 
 namespace Ohana3DS_Rebirth.GUI
 {
     public partial class OContainerPanel : UserControl, IPanel
     {
-        OContainer container;
+        private OContainer container;
+        public event EventHandler<OpenSubResourceArgs> OpenSubResource;
 
         public OContainerPanel()
         {
@@ -41,7 +43,24 @@ namespace Ohana3DS_Rebirth.GUI
             FileList.Refresh();
         }
 
-        private void BtnExportAll_Click(object sender, System.EventArgs e)
+        private byte[] Read(OContainer.fileEntry file)
+        {
+            byte[] buffer;
+
+            if (file.loadFromDisk)
+            {
+                buffer = new byte[file.fileLength];
+                container.data.Seek(file.fileOffset, SeekOrigin.Begin);
+                container.data.Read(buffer, 0, buffer.Length);
+            }
+            else
+                buffer = file.data;
+
+            if (file.doDecompression) buffer = LZSS_Ninty.decompress(buffer);
+            return buffer;
+        }
+
+        private void BtnExportAll_Click(object sender, EventArgs e)
         {
             using (FolderBrowserDialog browserDlg = new FolderBrowserDialog())
             {
@@ -53,27 +72,14 @@ namespace Ohana3DS_Rebirth.GUI
                         string fileName = Path.Combine(browserDlg.SelectedPath, file.name);
                         string dir = Path.GetDirectoryName(fileName);
                         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-
-                        byte[] buffer;
-
-                        if (file.loadFromDisk)
-                        {
-                            buffer = new byte[file.fileLength];
-                            container.data.Seek(file.fileOffset, SeekOrigin.Begin);
-                            container.data.Read(buffer, 0, buffer.Length);
-                        }
-                        else
-                            buffer = file.data;
-
-                        if (file.doDecompression) buffer = LZSS_Ninty.decompress(buffer);
-
-                        File.WriteAllBytes(fileName, buffer);
+                        
+                        File.WriteAllBytes(fileName, Read(file));
                     }
                 }
             }
         }
 
-        private void BtnExport_Click(object sender, System.EventArgs e)
+        private void BtnExport_Click(object sender, EventArgs e)
         {
             if (FileList.SelectedIndex == -1) return;
             using (SaveFileDialog saveDlg = new SaveFileDialog())
@@ -84,30 +90,32 @@ namespace Ohana3DS_Rebirth.GUI
                 if (saveDlg.ShowDialog() == DialogResult.OK)
                 {
                     OContainer.fileEntry file = container.content[FileList.SelectedIndex];
-
-                    byte[] buffer;
-
-                    if (file.loadFromDisk)
-                    {
-                        buffer = new byte[file.fileLength];
-                        container.data.Seek(file.fileOffset, SeekOrigin.Begin);
-                        container.data.Read(buffer, 0, buffer.Length);
-                    }
-                    else
-                        buffer = file.data;
-
-                    if (file.doDecompression) buffer = LZSS_Ninty.decompress(buffer);
-
-                    File.WriteAllBytes(saveDlg.FileName, buffer);
+                    File.WriteAllBytes(saveDlg.FileName, Read(file));
                 }
             }
         }
 
-        string[] lengthUnits = { "Bytes", "KB", "MB", "GB", "TB" };
+        /// <summary>
+        /// Opens the selected resource
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Open(object sender, EventArgs e)
+        {
+            if (FileList.SelectedIndex == -1) return;
+            OContainer.fileEntry file = container.content[FileList.SelectedIndex];
+            byte[] data = Read(file);
+            Stream stream = new MemoryStream(data);
+
+            OpenSubResource(this, new OpenSubResourceArgs(file.name, stream));
+        }
+
+        private static readonly string[] lengthUnits = { "Bytes", "KB", "MB", "GB", "TB" };
+
         private string getLength(uint length)
         {
             int i = 0;
-            while (length > 0x400)
+            while (length > 0x400 && i < lengthUnits.Length)
             {
                 length /= 0x400;
                 i++;

@@ -6,13 +6,21 @@ using Ohana3DS_Rebirth.GUI;
 using Ohana3DS_Rebirth.Ohana;
 using Ohana3DS_Rebirth_GUI.Properties;
 using Ohana3DS_Rebirth.Tools;
+using System.IO;
 
 namespace Ohana3DS_Rebirth
 {
     public partial class FrmMain : OForm
     {
-        bool hasFileToOpen;
-        string fileToOpen;
+        private bool hasFileToOpen;
+        private string fileToOpen;
+
+        delegate void openFile(string fileNmame);
+        delegate void openFiles(string[] fileNames);
+
+
+        private FileIO.formatType currentFormat;
+        private IPanel currentPanel;
 
         public FrmMain()
         {
@@ -69,13 +77,45 @@ namespace Ohana3DS_Rebirth
             if (currentPanel != null) currentPanel.finalize();
         }
 
-        delegate void openFile(string fileNmame);
-        delegate void openFiles(string[] fileNames);
-
-        FileIO.formatType currentFormat;
-        IPanel currentPanel;
+        private void Panel_OpenSubResource(object sender, OpenSubResourceArgs args)
+        {
+            open(args.Stream);
+        }
 
         public void open(string fileName)
+        {
+            FileIO.file file;
+            try
+            {
+                file = FileIO.load(fileName);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine("Could not open file `" + fileName + "`: " + e.ToString());
+                MessageBox.Show("Unsupported file format!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            open(file);
+        }
+        public void open(Stream stream)
+        {
+            FileIO.file file;
+            try
+            {
+                file = FileIO.load(stream);
+            }
+            catch(Exception e)
+            {
+                Console.Error.WriteLine("Could not open stream: " + e.ToString());
+                MessageBox.Show("Unsupported file format!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            open(file);
+        }
+
+        private void open(FileIO.file file)
         {
             if (currentPanel != null)
             {
@@ -85,7 +125,7 @@ namespace Ohana3DS_Rebirth
             
             try
             {
-                FileIO.file file = FileIO.load(fileName);
+                //FileIO.file file = FileIO.load(fileName);
                 currentFormat = file.type;
 
                 if (currentFormat != FileIO.formatType.unsupported)
@@ -111,6 +151,7 @@ namespace Ohana3DS_Rebirth
                     ContentContainer.Controls.Add((Control)currentPanel);
                     ContentContainer.Controls.SetChildIndex((Control)currentPanel, 0);
                     ResumeDrawing();
+                    currentPanel.OpenSubResource += Panel_OpenSubResource;
                     currentPanel.launch(file.data);
                 }
                 else

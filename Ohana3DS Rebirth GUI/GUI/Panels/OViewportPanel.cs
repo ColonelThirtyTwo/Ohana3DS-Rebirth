@@ -16,6 +16,8 @@ namespace Ohana3DS_Rebirth.GUI
         RenderBase.OVector2 finalMovement;
         bool clicked;
 
+        event EventHandler<OpenSubResourceArgs> IPanel.OpenSubResource { add { } remove { } }
+
         public bool ShowSidebar
         {
             set
