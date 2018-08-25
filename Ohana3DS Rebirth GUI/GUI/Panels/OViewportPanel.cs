@@ -59,6 +59,7 @@ namespace Ohana3DS_Rebirth.GUI
         {
             TexturesPanel.finalize();
             renderer.Dispose();
+            renderer = null;
         }
 
         private void Screen_Resize(object sender, EventArgs e)
@@ -114,9 +115,11 @@ namespace Ohana3DS_Rebirth.GUI
 
         private void Screen_MouseWheel(object sender, MouseEventArgs e)
         {
+            if (renderer == null)
+                return;
             float step = 1f;
             if (ModifierKeys == Keys.Shift) step = 0.1f;
-            if (renderer != null && e.Delta > 0)
+            if (e.Delta > 0)
                 renderer.setZoom(renderer.Zoom + step);
             else
                 renderer.setZoom(renderer.Zoom - step);

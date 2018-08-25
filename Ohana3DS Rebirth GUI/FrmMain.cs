@@ -121,6 +121,7 @@ namespace Ohana3DS_Rebirth
             {
                 currentPanel.finalize();
                 ContentContainer.Controls.Remove((Control)currentPanel);
+                currentPanel = null;
             }
             
             try
@@ -168,6 +169,7 @@ namespace Ohana3DS_Rebirth
                 {
                     currentPanel.finalize();
                     ContentContainer.Controls.Remove((Control)currentPanel);
+                    currentPanel = null;
                 }
             }
         }
@@ -178,6 +180,7 @@ namespace Ohana3DS_Rebirth
             {
                 currentPanel.finalize();
                 ContentContainer.Controls.Remove((Control)currentPanel);
+                currentPanel = null;
             }
 
             RenderBase.OModelGroup model = new RenderBase.OModelGroup();
