@@ -1,7 +1,10 @@
 ﻿using Microsoft.Win32;
 using Ohana3DS_Rebirth.Ohana;
 using Ohana3DS_Rebirth.Ohana.Containers;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,6 +17,46 @@ namespace GUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private class ItemEntry : INotifyPropertyChanged
+        {
+            private OContainer.FileEntry _ThisItem;
+            public OContainer.FileEntry ThisItem
+            {
+                get => _ThisItem;
+                set {
+                    _ThisItem = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ThisItem"));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name"));
+                }
+            }
+            
+            private FileIO.file _ThisFile { get; set; }
+            public FileIO.file ThisFile
+            {
+                get => _ThisFile;
+                set
+                {
+                    _ThisFile = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ThisFile"));
+                }
+            }
+
+            private List<ItemEntry> _SubEntries;
+            public List<ItemEntry> SubEntries
+            {
+                get => _SubEntries;
+                set
+                {
+                    _SubEntries = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SubEntries"));
+                }
+            }
+
+            public string Name { get => ThisItem?.name; }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+        }
+
         private OContainer RootContainer;
 
         public MainWindow()
@@ -31,30 +74,19 @@ namespace GUI
             SetVieportLabel("Double click a container entry to open it");
             RootContainer = container;
 
-            ArchiveContent.Items.Clear();
-            var root_item = new TreeViewItem();
-            root_item.Header = "Root";
-            root_item.IsExpanded = true;
-
-            PopulateContainerEntry(container, root_item);
-            ArchiveContent.Items.Add(root_item);
+            ArchiveContent.DataContext = null;
+            var root_data = new ItemEntry();
+            PopulateContainerEntry(container, root_data);
+            ArchiveContent.DataContext = root_data;
 
             CloseMenuItem.IsEnabled = true;
             ArchiveContent.IsEnabled = true;
         }
 
-        private void PopulateContainerEntry(OContainer container, TreeViewItem parent)
+        private void PopulateContainerEntry(OContainer container, ItemEntry item_entry)
         {
-            foreach (var entry in RootContainer)
-            {
-                var item = new TreeViewItem();
-                item.Header = entry.name;
-                item.MouseDoubleClick += (object sender, MouseButtonEventArgs e) => {
-                    OpenContainerEntry(container, entry, item);
-                };
-
-                parent.Items.Add(item);
-            }
+            item_entry.ThisFile = new FileIO.file { data = container, type = FileIO.formatType.container };
+            item_entry.SubEntries = new List<ItemEntry>(container.Select(entry => new ItemEntry() { ThisItem = entry }));
         }
 
         /// <summary>
@@ -94,7 +126,7 @@ namespace GUI
             Viewport.Children.Add(viewport_label);
         }
 
-        private void OpenContainerEntry(OContainer container, OContainer.FileEntry entry, TreeViewItem item)
+        private void OpenContainerEntry(OContainer.FileEntry entry, TreeViewItem item)
         {
             FileIO.file file;
             try
@@ -115,7 +147,7 @@ namespace GUI
 
             if (file.type == FileIO.formatType.container)
             {
-                PopulateContainerEntry((OContainer)file.data, item);
+                PopulateContainerEntry((OContainer)file.data, (ItemEntry)item.DataContext);
             }
             else if (file.type == FileIO.formatType.image)
             {
@@ -131,7 +163,7 @@ namespace GUI
         private void OpenMenuItem_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Binary files (*.bin)|*.bin|All files (*.*)|*.*";
+            dialog.Filter = "All files (*.*)|*.*";
             if (dialog.ShowDialog() != true)
                 return;
 
@@ -174,6 +206,18 @@ namespace GUI
         private void QuitMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void OpenTreeViewItem(TreeViewItem sender)
+        {
+
+        }
+
+        private void TreeViewItem_MouseDoubleClick(object osender, MouseButtonEventArgs e)
+        {
+            var sender = (TreeViewItem)osender;
+            var str = sender.DataContext == null ? "null" : sender.DataContext.ToString();
+            MessageBox.Show(this, "you double clicked on "+ str+"("+sender+")", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
