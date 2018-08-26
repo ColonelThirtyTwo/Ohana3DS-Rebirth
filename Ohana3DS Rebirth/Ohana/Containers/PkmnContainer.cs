@@ -23,39 +23,38 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
         /// <returns></returns>
         public static OContainer load(Stream data)
         {
-            BinaryReader input = new BinaryReader(data); ;
-            OContainer output = null;
-
-            string magic = IOUtils.readString(input, 0, 2); //Magic
-            ushort sectionCount = input.ReadUInt16();
-            output = new OContainer();
-
-            for (int i = 0; i < sectionCount; i++)
+            using (var input = new BinaryReader(data))
             {
-                OContainer.fileEntry entry = new OContainer.fileEntry();
+                OContainer output = new OContainer();
+                string magic = IOUtils.readString(input, 0, 2); //Magic
+                ushort sectionCount = input.ReadUInt16();
 
-                data.Seek(4 + (i * 4), SeekOrigin.Begin);
-                uint startOffset = input.ReadUInt32();
-                uint endOffset = input.ReadUInt32();
-                uint length = endOffset - startOffset;
+                for (int i = 0; i < sectionCount; i++)
+                {
+                    OContainer.fileEntry entry = new OContainer.fileEntry();
 
-                data.Seek(startOffset, SeekOrigin.Begin);
-                byte[] buffer = new byte[length];
-                input.Read(buffer, 0, (int)length);
+                    data.Seek(4 + (i * 4), SeekOrigin.Begin);
+                    uint startOffset = input.ReadUInt32();
+                    uint endOffset = input.ReadUInt32();
+                    if (startOffset > endOffset)
+                        throw new ParseException(string.Format("Start offset ({0}) larger than end offset ({1})", startOffset, endOffset));
+                    uint length = endOffset - startOffset;
 
-                bool isCompressed = buffer.Length > 0 ? buffer[0] == 0x11 : false;
-                string extension = FileIO.getExtension(buffer, isCompressed ? 5 : 0);
-                string name = string.Format("file_{0:D5}{1}", i, extension);
+                    data.Seek(startOffset, SeekOrigin.Begin);
+                    byte[] buffer = new byte[length];
+                    input.Read(buffer, 0, (int)length);
 
-                entry.data = buffer;
-                entry.name = name;
+                    bool isCompressed = buffer.Length > 0 ? buffer[0] == 0x11 : false;
+                    string extension = FileIO.getExtension(buffer, isCompressed ? 5 : 0);
+                    string name = string.Format("file_{0:D5}{1}", i, extension);
 
-                output.content.Add(entry);
+                    entry.data = buffer;
+                    entry.name = name;
+
+                    output.content.Add(entry);
+                }
+                return output;
             }
-
-            data.Close();
-
-            return output;
         }
     }
 }
