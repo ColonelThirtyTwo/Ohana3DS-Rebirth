@@ -41,11 +41,7 @@ namespace Ohana3DS_Rebirth.Ohana
             {
                 case ".mbn": return new file { data = MBN.load(fileName), type = formatType.model };
                 case ".xml": return new file { data = NLP.load(fileName), type = formatType.model };
-                default:
-                    using (var stream = new FileStream(fileName, FileMode.Open))
-                    {
-                        return load(stream);
-                    }
+                default: return load(new FileStream(fileName, FileMode.Open));
             }
         }
 
