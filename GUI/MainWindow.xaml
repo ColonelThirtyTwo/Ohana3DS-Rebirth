@@ -7,21 +7,20 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Window.Resources>
-        <HierarchicalDataTemplate x:Key="ContainerEntryTemplate">
+        <Style x:Key="ContainerEntryStyle" TargetType="{x:Type TreeViewItem}">
+            <EventSetter Event="Control.MouseDoubleClick" Handler="TreeViewItem_MouseDoubleClick"/>
+        </Style>
+        <HierarchicalDataTemplate x:Key="ContainerEntryTemplate" ItemContainerStyle="{StaticResource ContainerEntryStyle}">
             <TextBlock Text="{Binding Name}">
                 <TextBlock.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="View" />
+                        <MenuItem Header="View" Click="ContainerViewMenuItem" />
                         <MenuItem Header="Export" />
-                        <MenuItem Header="Extract Raw" />
+                        <MenuItem Header="Extract Raw" Click="ContainerExtractRawMenuItem" />
                     </ContextMenu>
                 </TextBlock.ContextMenu>
             </TextBlock>
         </HierarchicalDataTemplate>
-        <Style x:Key="ContainerEntryStyle" TargetType="{x:Type TreeViewItem}">
-            <!--<Setter Property="ItemContainerStyle" Value="{StaticResource ContainerEntryStyle}"/>-->
-            <EventSetter Event="MouseDoubleClick" Handler="TreeViewItem_MouseDoubleClick"/>
-        </Style>
     </Window.Resources>
     <Grid>
         <DockPanel>
@@ -40,9 +39,9 @@
                 </Grid.ColumnDefinitions>
                 <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Width="5px"/>
                 <TreeView x:Name="ArchiveContent" MinWidth="100px" IsEnabled="False" ItemTemplate="{DynamicResource ContainerEntryTemplate}" ItemContainerStyleSelector="{Binding Mode=OneWay, Source={StaticResource ContainerEntryStyle}}" ItemsSource="{Binding SubEntries}">
-                    <TreeView.Resources>
+                    <!--<TreeView.Resources>
                         <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource ContainerEntryStyle}"/>
-                    </TreeView.Resources>
+                    </TreeView.Resources>-->
                 </TreeView>
                 <DockPanel x:Name="Viewport" Grid.Column="2"/>
             </Grid>

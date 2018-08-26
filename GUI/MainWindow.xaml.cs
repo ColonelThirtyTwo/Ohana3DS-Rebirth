@@ -126,12 +126,12 @@ namespace GUI
             Viewport.Children.Add(viewport_label);
         }
 
-        private void OpenContainerEntry(OContainer.FileEntry entry, TreeViewItem item)
+        private void OpenContainerEntry(ItemEntry entry)
         {
             FileIO.file file;
             try
             {
-                var stream = new MemoryStream(entry.Load());
+                var stream = new MemoryStream(entry.ThisItem.Load());
                 file = FileIO.load(stream);
             }
             catch (IOException err)
@@ -147,7 +147,8 @@ namespace GUI
 
             if (file.type == FileIO.formatType.container)
             {
-                PopulateContainerEntry((OContainer)file.data, (ItemEntry)item.DataContext);
+                entry.ThisFile = file;
+                PopulateContainerEntry((OContainer)file.data, entry);
             }
             else if (file.type == FileIO.formatType.image)
             {
@@ -159,7 +160,7 @@ namespace GUI
                 return;
             }
         }
-
+        
         private void OpenMenuItem_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
@@ -174,7 +175,7 @@ namespace GUI
             }
             catch (IOException err)
             {
-                MessageBox.Show(this, "Could not load file: " + err.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, "Could not load file: " + err.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             catch (ParseException err)
@@ -207,17 +208,52 @@ namespace GUI
         {
             Close();
         }
-
-        private void OpenTreeViewItem(TreeViewItem sender)
-        {
-
-        }
-
+        
         private void TreeViewItem_MouseDoubleClick(object osender, MouseButtonEventArgs e)
         {
             var sender = (TreeViewItem)osender;
-            var str = sender.DataContext == null ? "null" : sender.DataContext.ToString();
-            MessageBox.Show(this, "you double clicked on "+ str+"("+sender+")", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            OpenContainerEntry((ItemEntry)sender.DataContext);
+        }
+
+        private static T FindParent<T>(DependencyObject obj) where T: DependencyObject
+        {
+            var parent = LogicalTreeHelper.GetParent(obj);
+            if (parent == null)
+                return null;
+            if (parent is T parent_as_t)
+                return parent_as_t;
+            return FindParent<T>(parent);
+        }
+
+        private void ContainerViewMenuItem(object osender, RoutedEventArgs e)
+        {
+            var sender = FindParent<ContextMenu>((MenuItem)osender);
+            OpenContainerEntry((ItemEntry)sender.DataContext);
+        }
+
+        private void ContainerExtractRawMenuItem(object osender, RoutedEventArgs e)
+        {
+            var sender = FindParent<ContextMenu>((MenuItem)osender);
+            var data = (ItemEntry)sender.DataContext;
+
+            var dialog = new SaveFileDialog();
+            dialog.FileName = data.ThisItem.name;
+            dialog.Filter = "All files (*.*)|*.*";
+            if (dialog.ShowDialog() != true)
+                return;
+
+            try
+            {
+                using(var file = File.Create(dialog.FileName))
+                {
+                    var buffer = data.ThisItem.Load();
+                    file.Write(buffer, 0, buffer.Length);
+                }
+            }
+            catch(IOException err)
+            {
+                MessageBox.Show(this, "Could not save file: "+err.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
