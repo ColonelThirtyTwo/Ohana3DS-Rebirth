@@ -45,9 +45,6 @@ namespace GUI
             Image.BeginInit();
             Image.Source = backing_image;
             Image.EndInit();
-
-            WidthLabel.Content = image.texture.Width + "px";
-            HeightLabel.Content = image.texture.Height + "px";
         }
     }
 }

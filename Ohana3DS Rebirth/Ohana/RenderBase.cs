@@ -1548,7 +1548,7 @@ namespace Ohana3DS_Rebirth.Ohana
         public class OTexture
         {
             public Bitmap texture;
-            public string name;
+            public string name { get; set; }
 
             /// <summary>
             ///     Creates a new Texture.
@@ -1561,6 +1561,9 @@ namespace Ohana3DS_Rebirth.Ohana
                 _texture.Dispose();
                 name = _name;
             }
+
+            public int Width { get => texture.Width; }
+            public int Height { get => texture.Height; }
         }
 
         /// <summary>

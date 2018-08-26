@@ -33,17 +33,21 @@
             </Menu>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" MinWidth="100px"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" MinWidth="100px"/>
                 </Grid.ColumnDefinitions>
-                <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Width="5px"/>
-                <TreeView x:Name="ArchiveContent" MinWidth="100px" IsEnabled="False" ItemTemplate="{DynamicResource ContainerEntryTemplate}" ItemContainerStyleSelector="{Binding Mode=OneWay, Source={StaticResource ContainerEntryStyle}}" ItemsSource="{Binding SubEntries}">
+                <TreeView x:Name="ArchiveContent" IsEnabled="False" ItemTemplate="{DynamicResource ContainerEntryTemplate}" ItemContainerStyleSelector="{Binding Mode=OneWay, Source={StaticResource ContainerEntryStyle}}" ItemsSource="{Binding SubEntries}">
                     <TreeView.Resources>
                         <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource ContainerEntryStyle}"/>
                     </TreeView.Resources>
                 </TreeView>
-                <DockPanel x:Name="Viewport" Grid.Column="2"/>
+                <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Width="5px"/>
+                <Grid x:Name="Viewport" Grid.Column="2"/>
+                <GridSplitter Grid.Column="3" HorizontalAlignment="Left" Width="5px"/>
+                <Grid x:Name="DataPanel" Grid.Column="4"/>
             </Grid>
 
         </DockPanel>

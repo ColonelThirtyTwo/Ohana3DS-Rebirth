@@ -71,7 +71,7 @@ namespace GUI
         /// <param name="container"></param>
         public void OpenContainer(OContainer container, string name="Root")
         {
-            SetVieportLabel("Double click a container entry to open it");
+            SetViewportLabel("Double click a container entry to open it");
             RootContainer = container;
 
             ArchiveContent.DataContext = null;
@@ -95,11 +95,16 @@ namespace GUI
         /// Does not affect the currently loaded container tree.
         /// </summary>
         /// <param name="texture">Texture to view</param>
-        public void ViewTexture(OTexture texture)
+        public void SetViewportTexture(OTexture texture)
         {
             Viewport.Children.Clear();
+            DataPanel.Children.Clear();
+
             var viewport_control = new TextureView(texture);
             Viewport.Children.Add(viewport_control);
+
+            var details_control = new TextureDetails(texture);
+            DataPanel.Children.Add(details_control);
         }
 
         /// <summary>
@@ -107,16 +112,21 @@ namespace GUI
         /// </summary>
         public void CloseContainer()
         {
-            SetVieportLabel("No file opened");
-            RootContainer = null;
-            ArchiveContent.Items.Clear();
+            SetViewportLabel("No file opened");
+            ArchiveContent.DataContext = null;
+            if (RootContainer != null)
+            {
+                RootContainer.Dispose();
+                RootContainer = null;
+            }
             CloseMenuItem.IsEnabled = false;
             ArchiveContent.IsEnabled = false;
         }
 
-        private void SetVieportLabel(string contents)
+        private void SetViewportLabel(string contents)
         {
             Viewport.Children.Clear();
+            DataPanel.Children.Clear();
             var viewport_label = new Label()
             {
                 VerticalAlignment = VerticalAlignment.Center,
@@ -152,7 +162,7 @@ namespace GUI
             }
             else if (file.type == FileIO.formatType.image)
             {
-                ViewTexture((OTexture)file.data);
+                SetViewportTexture((OTexture)file.data);
             }
             else
             {
@@ -194,7 +204,7 @@ namespace GUI
             }
             else if (file.type == FileIO.formatType.image || file.type == FileIO.formatType.texture)
             {
-                ViewTexture((OTexture)file.data);
+                SetViewportTexture((OTexture)file.data);
             }
             else
             {
@@ -269,6 +279,8 @@ namespace GUI
             if (files.Length != 1)
                 return;
             var file = files[0];
+
+            CloseContainer();
             OpenFile(file);
         }
 
