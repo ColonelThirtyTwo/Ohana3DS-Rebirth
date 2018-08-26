@@ -22,11 +22,9 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
         /// <returns>The container data</returns>
         public static OContainer load(Stream data)
         {
-            OContainer output = new OContainer();
+            OContainer output = new OContainer(data);
             BinaryReader input = new BinaryReader(data);
-
-            output.data = data;
-
+            
             string garcMagic = IOUtils.readStringWithLength(input, 4);
             uint garcLength = input.ReadUInt32();
             ushort endian = input.ReadUInt16();
@@ -78,13 +76,8 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
                         string name = folder + string.Format("file_{0:D5}{1}", flags == 1 ? i : bit, extension);
 
                         //And add the file to the container list
-                        OContainer.fileEntry entry = new OContainer.fileEntry();
-                        entry.name = name;
-                        entry.loadFromDisk = true;
-                        entry.fileOffset = startOffset + dataOffset;
-                        entry.fileLength = length;
-                        entry.doDecompression = isCompressed;
-                        output.content.Add(entry);
+                        OContainer.FileEntry entry = new OContainer.FileEntry(output, name, isCompressed, startOffset+dataOffset, length);
+                        output.Add(entry);
 
                         input.BaseStream.Seek(position, SeekOrigin.Begin);
                     }

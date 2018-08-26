@@ -18,9 +18,9 @@ namespace Ohana3DS_Rebirth.Ohana.Textures.PocketMonsters
             RenderBase.OModelGroup models = new RenderBase.OModelGroup();
 
             OContainer container = PkmnContainer.load(data);
-            for (int i = 0; i < container.content.Count; i++)
+            foreach(var entry in container)
             {
-                FileIO.file file = FileIO.load(new MemoryStream(container.content[i].data));
+                FileIO.file file = FileIO.load(new MemoryStream(entry.data));
                 if (file.type == FileIO.formatType.model) textures.AddRange(((RenderBase.OModelGroup)file.data).texture);
             }
 

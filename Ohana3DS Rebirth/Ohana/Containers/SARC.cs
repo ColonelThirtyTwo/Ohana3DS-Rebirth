@@ -52,10 +52,8 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
                 data.Read(buffer, 0, buffer.Length);
                 if (name == "") name = string.Format("file_{0:D5}{1}", i, FileIO.getExtension(buffer));
 
-                OContainer.fileEntry entry = new OContainer.fileEntry();
-                entry.name = name;
-                entry.data = buffer;
-                output.content.Add(entry);
+                OContainer.FileEntry entry = new OContainer.FileEntry(output, name, false, buffer);
+                output.Add(entry);
             }
 
             data.Close();

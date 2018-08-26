@@ -31,8 +31,6 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
 
                 for (int i = 0; i < sectionCount; i++)
                 {
-                    OContainer.fileEntry entry = new OContainer.fileEntry();
-
                     data.Seek(4 + (i * 4), SeekOrigin.Begin);
                     uint startOffset = input.ReadUInt32();
                     uint endOffset = input.ReadUInt32();
@@ -48,10 +46,8 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
                     string extension = FileIO.getExtension(buffer, isCompressed ? 5 : 0);
                     string name = string.Format("file_{0:D5}{1}", i, extension);
 
-                    entry.data = buffer;
-                    entry.name = name;
-
-                    output.content.Add(entry);
+                    OContainer.FileEntry entry = new OContainer.FileEntry(output, name, false, buffer);
+                    output.Add(entry);
                 }
                 return output;
             }

@@ -2,6 +2,7 @@
 using Ohana3DS_Rebirth.Ohana.Containers;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Ohana3DS_Rebirth.Ohana.Models.PocketMonsters
 {
@@ -17,9 +18,9 @@ namespace Ohana3DS_Rebirth.Ohana.Models.PocketMonsters
             RenderBase.OModelGroup models = new RenderBase.OModelGroup();
 
             OContainer container = PkmnContainer.load(data);
-            models = GfModel.load(new MemoryStream(container.content[0].data));
+            models = GfModel.load(new MemoryStream(container.First().data));
 
-            List<RenderBase.OSkeletalAnimation> anms = GfMotion.load(new MemoryStream(container.content[1].data));
+            List<RenderBase.OSkeletalAnimation> anms = GfMotion.load(new MemoryStream(container.ElementAt(1).data));
 
             foreach (RenderBase.OSkeletalAnimation anm in anms)
             {

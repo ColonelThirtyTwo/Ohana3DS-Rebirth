@@ -16,9 +16,9 @@ namespace Ohana3DS_Rebirth.Ohana.Textures.PocketMonsters
             RenderBase.OModelGroup models = new RenderBase.OModelGroup();
 
             OContainer container = PkmnContainer.load(data);
-            for (int i = 1; i < container.content.Count; i++)
+            foreach(var entry in container)
             {
-                FileIO.file file = FileIO.load(new MemoryStream(container.content[i].data));
+                FileIO.file file = FileIO.load(new MemoryStream(entry.data));
                 if (file.type == FileIO.formatType.model) models.merge((RenderBase.OModelGroup)file.data);
             }
 

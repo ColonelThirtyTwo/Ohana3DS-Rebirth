@@ -1,5 +1,5 @@
 ﻿using System.IO;
-
+using System.Linq;
 using Ohana3DS_Rebirth.Ohana.Containers;
 using Ohana3DS_Rebirth.Ohana.Models;
 using System.Collections.Generic;
@@ -17,9 +17,11 @@ namespace Ohana3DS_Rebirth.Ohana.Animations.PocketMonsters
         {
             List<RenderBase.OModelGroup> models = new List<RenderBase.OModelGroup>();
             OContainer naCont = PkmnContainer.load(data); //Get NA containers from BS
-            for (int i = 1; i < naCont.content.Count; i++) { //Skip first entry because its not a NA (TODO: figure out this data)
-                OContainer bchCont = PkmnContainer.load(new MemoryStream(naCont.content[1].data)); //Get BCH from NA containers
-                models.Add(BCH.load(new MemoryStream(bchCont.content[0].data)));
+            var naList = naCont.GetList();
+            foreach(var entry in naCont.Skip(1))
+            {
+                OContainer bchCont = PkmnContainer.load(new MemoryStream(entry.data)); //Get BCH from NA containers
+                models.Add(BCH.load(new MemoryStream(bchCont.First().data)));
             }
 
             return models[0]; //TODO: Figure out how to load all anim BCHs

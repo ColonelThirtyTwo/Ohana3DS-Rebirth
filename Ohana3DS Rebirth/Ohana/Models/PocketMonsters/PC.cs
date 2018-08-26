@@ -19,7 +19,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models.PocketMonsters
 
             OContainer container = PkmnContainer.load(data);
 
-            foreach (OContainer.fileEntry file in container.content)
+            foreach (OContainer.FileEntry file in container)
             {
                 FileIO.file loaded = new FileIO.file();
 

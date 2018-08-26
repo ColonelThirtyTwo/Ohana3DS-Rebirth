@@ -1,6 +1,7 @@
 ﻿using System.IO;
 
 using Ohana3DS_Rebirth.Ohana.Containers;
+using System.Linq;
 
 namespace Ohana3DS_Rebirth.Ohana.Models.PocketMonsters
 {
@@ -16,7 +17,7 @@ namespace Ohana3DS_Rebirth.Ohana.Models.PocketMonsters
             RenderBase.OModelGroup models;
 
             OContainer container = PkmnContainer.load(data);
-            models = BCH.load(new MemoryStream(container.content[1].data));
+            models = BCH.load(new MemoryStream(container.ElementAt(1).data));
 
             return models;
         }

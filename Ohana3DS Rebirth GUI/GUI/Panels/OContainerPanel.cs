@@ -19,11 +19,8 @@ namespace Ohana3DS_Rebirth.GUI
 
         public void finalize()
         {
-            if (container.data != null)
-            {
-                container.data.Close();
-                container.data = null;
-            }
+            container.Dispose();
+            container = null;
         }
 
         public void launch(object data)
@@ -31,7 +28,7 @@ namespace Ohana3DS_Rebirth.GUI
             container = (OContainer)data;
             FileList.addColumn(new OList.columnHeader(384, "Name"));
             FileList.addColumn(new OList.columnHeader(128, "Size"));
-            foreach (OContainer.fileEntry file in container.content)
+            foreach (OContainer.FileEntry file in container)
             {
                 OList.listItemGroup item = new OList.listItemGroup();
                 item.columns.Add(new OList.listItem(file.name));
@@ -43,7 +40,7 @@ namespace Ohana3DS_Rebirth.GUI
             FileList.Refresh();
         }
 
-        private byte[] Read(OContainer.fileEntry file)
+        private byte[] Read(OContainer.FileEntry file)
         {
             byte[] buffer;
 
@@ -67,7 +64,7 @@ namespace Ohana3DS_Rebirth.GUI
                 browserDlg.Description = "Export all files";
                 if (browserDlg.ShowDialog() == DialogResult.OK)
                 {
-                    foreach (OContainer.fileEntry file in container.content)
+                    foreach (OContainer.FileEntry file in container)
                     {
                         string fileName = Path.Combine(browserDlg.SelectedPath, file.name);
                         string dir = Path.GetDirectoryName(fileName);
@@ -84,12 +81,13 @@ namespace Ohana3DS_Rebirth.GUI
             if (FileList.SelectedIndex == -1) return;
             using (SaveFileDialog saveDlg = new SaveFileDialog())
             {
+                var list = container.GetList();
                 saveDlg.Title = "Export file";
-                saveDlg.FileName = container.content[FileList.SelectedIndex].name;
+                saveDlg.FileName = list[FileList.SelectedIndex].name;
                 saveDlg.Filter = "All files|*.*";
                 if (saveDlg.ShowDialog() == DialogResult.OK)
                 {
-                    OContainer.fileEntry file = container.content[FileList.SelectedIndex];
+                    OContainer.FileEntry file = list[FileList.SelectedIndex];
                     File.WriteAllBytes(saveDlg.FileName, Read(file));
                 }
             }
@@ -103,7 +101,7 @@ namespace Ohana3DS_Rebirth.GUI
         private void Open(object sender, EventArgs e)
         {
             if (FileList.SelectedIndex == -1) return;
-            OContainer.fileEntry file = container.content[FileList.SelectedIndex];
+            OContainer.FileEntry file = container.GetList()[FileList.SelectedIndex];
             byte[] data = Read(file);
             Stream stream = new MemoryStream(data);
 

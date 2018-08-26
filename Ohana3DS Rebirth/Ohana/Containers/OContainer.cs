@@ -1,42 +1,116 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 
 namespace Ohana3DS_Rebirth.Ohana.Containers
 {
-    public class OContainer
+    public class OContainer: IEnumerable<OContainer.FileEntry>, IDisposable
     {
-        public struct fileEntry
+        public class FileEntry
         {
-            public string name;
-            public byte[] data;
+            public FileEntry(OContainer parent, string name, bool compressed, byte[] data)
+            {
+                Container = parent;
+                this.data = data;
+                this.name = name;
+                loadFromDisk = false;
+                fileOffset = 0;
+                fileLength = 0;
+                doDecompression = compressed;
+            }
 
-            public bool loadFromDisk;
-            public uint fileOffset;
-            public uint fileLength;
-            public bool doDecompression;
+            public FileEntry(OContainer parent, string name, bool compressed, uint fileOffset, uint fileLength)
+            {
+                Container = parent;
+                data = null;
+                this.name = name;
+                loadFromDisk = true;
+                this.fileOffset = fileOffset;
+                this.fileLength = fileLength;
+                doDecompression = compressed;
+            }
+
+            public string name { get; private set; }
+            public byte[] data { get; private set; }
+
+            public bool loadFromDisk { get; private set; }
+            public uint fileOffset { get; private set; }
+            public uint fileLength { get; private set; }
+            public bool doDecompression { get; private set; }
+
+            public OContainer Container { get; private set; }
+
+            /// <summary>
+            /// Reads the entry contents, either by returning `data` or by reading it from the backing Stream.
+            /// </summary>
+            /// <returns></returns>
+            public byte[] Load()
+            {
+                if (data != null)
+                    return data;
+                var buffer = new byte[fileLength];
+                Container.data.Seek(fileOffset, SeekOrigin.Begin);
+                Container.data.Read(buffer, 0, buffer.Length);
+                return buffer;
+            }
         }
 
-        public Stream data;
-        public List<fileEntry> content;
+        public Stream data { get; private set; }
+        private List<FileEntry> content;
 
-        public OContainer()
+        public OContainer(Stream backing_stream=null)
         {
-            content = new List<fileEntry>();
+            data = backing_stream;
+            content = new List<FileEntry>();
         }
 
         /// <summary>
-        /// Loads the contents of a fileEntry, if they need to be loaded from disk.
+        /// Adds a file entry to the container.
         /// </summary>
-        /// <param name="entry">Entry to load. Assumed to be from this container</param>
-        /// <returns>The loaded data</returns>
-        public byte[] Load(fileEntry entry)
+        /// The entry must have been created with this container object. Additionally, if `FileEntry.loadFromDisk` is set,
+        /// this container must have been created with a backing stream.
+        /// <param name="entry">Entry to add</param>
+        public void Add(FileEntry entry)
         {
-            if (entry.data != null)
-                return entry.data;
-            var buffer = new byte[entry.fileLength];
-            data.Seek(entry.fileOffset, SeekOrigin.Begin);
-            data.Read(buffer, 0, buffer.Length);
-            return buffer;
+            if (entry.Container != this)
+                throw new ArgumentException("Tried to add a FileEntry not belonging to this container");
+            if (entry.loadFromDisk && data == null)
+                throw new ArgumentException("Tried to add a FileEntry with loadFromDisk set to a container that does not have a backing stream");
+            content.Add(entry);
+        }
+
+        /// <summary>
+        /// Returns the entry at the specified index
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        public FileEntry this[int i] { get { return content[i]; } }
+
+        /// <summary>
+        /// Returns the list of all entries (read only).
+        /// </summary>
+        /// <returns></returns>
+        public ReadOnlyCollection<FileEntry> GetList()
+        {
+            return new ReadOnlyCollection<FileEntry>(content);
+        }
+
+        public IEnumerator<FileEntry> GetEnumerator()
+        {
+            return ((IEnumerable<FileEntry>)content).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<FileEntry>)content).GetEnumerator();
+        }
+
+        public void Dispose()
+        {
+            if (data != null)
+                ((IDisposable)data).Dispose();
         }
     }
 }

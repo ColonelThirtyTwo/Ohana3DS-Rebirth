@@ -45,7 +45,7 @@ namespace GUI
 
         private void PopulateContainerEntry(OContainer container, TreeViewItem parent)
         {
-            foreach (var entry in RootContainer.content)
+            foreach (var entry in RootContainer)
             {
                 var item = new TreeViewItem();
                 item.Header = entry.name;
@@ -94,12 +94,12 @@ namespace GUI
             Viewport.Children.Add(viewport_label);
         }
 
-        private void OpenContainerEntry(OContainer container, OContainer.fileEntry entry, TreeViewItem item)
+        private void OpenContainerEntry(OContainer container, OContainer.FileEntry entry, TreeViewItem item)
         {
             FileIO.file file;
             try
             {
-                var stream = new MemoryStream(container.Load(entry));
+                var stream = new MemoryStream(entry.Load());
                 file = FileIO.load(stream);
             }
             catch (IOException err)

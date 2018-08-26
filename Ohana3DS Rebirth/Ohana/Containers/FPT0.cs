@@ -55,15 +55,11 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
 
             foreach (sectionEntry file in files)
             {
-                OContainer.fileEntry entry = new OContainer.fileEntry();
-
                 data.Seek(file.offset, SeekOrigin.Begin);
                 byte[] buffer = new byte[file.length];
                 input.Read(buffer, 0, buffer.Length);
-                entry.data = buffer;
-                entry.name = file.name;
-
-                output.content.Add(entry);
+                OContainer.FileEntry entry = new OContainer.FileEntry(output, file.name, false, buffer);
+                output.Add(entry);
             }
 
             data.Close();

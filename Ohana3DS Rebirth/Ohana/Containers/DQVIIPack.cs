@@ -104,11 +104,8 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
                 byte[] buffer = new byte[length];
                 input.Read(buffer, 0, buffer.Length);
 
-                OContainer.fileEntry file = new OContainer.fileEntry();
-                file.name = CGFX.getName(new MemoryStream(buffer)) + ".bcmdl";
-                file.data = buffer;
-
-                output.content.Add(file);
+                OContainer.FileEntry file = new OContainer.FileEntry(output, CGFX.getName(new MemoryStream(buffer)) + ".bcmdl", false, buffer);
+                output.Add(file);
             }
 
             //FILE section
@@ -128,11 +125,8 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
             byte[] texBuffer = new byte[mainSection[5].length];
             input.Read(texBuffer, 0, texBuffer.Length);
 
-            OContainer.fileEntry texFile = new OContainer.fileEntry();
-            texFile.name = "textures.bctex";
-            texFile.data = texBuffer;
-
-            output.content.Add(texFile);
+            OContainer.FileEntry texFile = new OContainer.FileEntry(output, "textures.bctex", false, texBuffer);
+            output.Add(texFile);
 
             data.Close();
 

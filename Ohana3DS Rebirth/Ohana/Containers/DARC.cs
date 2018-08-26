@@ -75,11 +75,8 @@ namespace Ohana3DS_Rebirth.Ohana.Containers
                 byte[] buffer = new byte[entry.length];
                 data.Read(buffer, 0, buffer.Length);
 
-                OContainer.fileEntry file = new OContainer.fileEntry();
-                file.name = currDir + getName(input, entry.nameOffset + namesOffset);
-                file.data = buffer;
-
-                output.content.Add(file);
+                OContainer.FileEntry file = new OContainer.FileEntry(output, currDir + getName(input, entry.nameOffset + namesOffset), false, buffer);
+                output.Add(file);
             }
 
             data.Close();
