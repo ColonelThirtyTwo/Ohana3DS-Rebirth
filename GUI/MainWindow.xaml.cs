@@ -167,11 +167,15 @@ namespace GUI
             dialog.Filter = "All files (*.*)|*.*";
             if (dialog.ShowDialog() != true)
                 return;
+            OpenFile(dialog.FileName);
+        }
 
+        private void OpenFile(string filename)
+        {
             FileIO.file file;
             try
             {
-                file = FileIO.load(dialog.FileName);
+                file = FileIO.load(filename);
             }
             catch (IOException err)
             {
@@ -188,7 +192,7 @@ namespace GUI
             {
                 OpenContainer((OContainer)file.data);
             }
-            else if (file.type == FileIO.formatType.image)
+            else if (file.type == FileIO.formatType.image || file.type == FileIO.formatType.texture)
             {
                 ViewTexture((OTexture)file.data);
             }
@@ -254,6 +258,36 @@ namespace GUI
             {
                 MessageBox.Show(this, "Could not save file: "+err.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void Window_Drop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+                return;
+
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (files.Length != 1)
+                return;
+            var file = files[0];
+            OpenFile(file);
+        }
+
+        private void Window_Drag(object sender, DragEventArgs e)
+        {
+            e.Handled = true;
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.None;
+                return;
+            }
+
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (files.Length != 1)
+            {
+                e.Effects = DragDropEffects.None;
+                return;
+            }
+            e.Effects = DragDropEffects.Move;
         }
     }
 }
